@@ -1,9 +1,10 @@
 import { Field, Formik, Form } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
+import { useNavigate, useParams } from "react-router";
+import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router";
 
 const validatio12 = Yup.object().shape({
   username: Yup.string()
@@ -17,32 +18,26 @@ const validatio12 = Yup.object().shape({
     .required("age is Required"),
   gender: Yup.string().required("gender is Required"),
   myfile: Yup.string().required("Image must be required"),
-  passwd: Yup.string()
-    .required("Password is required")
-    .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!+@#\$%\^&\*])(?=.{8,})/,
-      "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character"
-    ),
-  cpasswd: Yup.string()
-    .required("Confirm password is required")
-    .oneOf([Yup.ref("passwd")], "Passwords do not match"),
 });
-function UserData() {
-  const navigate = useNavigate();
-  function createData(data) {
-    console.log("data", data);
 
+function UpdateUser() {
+  const [data, setData] = useState({});
+  const navigate = useNavigate();
+  const routeParams = useParams();
+
+  function createData(data1) {
+    console.log("data", data1);
     const Formdata = new FormData();
-    Formdata.append("username", data.username);
-    Formdata.append("age", data.age);
-    Formdata.append("email", data.email);
-    Formdata.append("gender", data.gender);
-    Formdata.append("myfile", data.myfile);
-    Formdata.append("name", data.name);
-    Formdata.append("passwd", data.passwd);
+    Formdata.append("username", data1.username);
+    Formdata.append("age", data1.age);
+    Formdata.append("email", data1.email);
+    Formdata.append("gender", data1.gender);
+    Formdata.append("myfile", data1.myfile);
+    Formdata.append("name", data1.name);
+    Formdata.append("id", routeParams.id);
     console.log("for id", Formdata);
     axios
-      .post("http://localhost:3001/user/create", Formdata)
+      .put("http://localhost:3001/user/update", Formdata)
       .then((req, resp) => {
         console.log("Created succesfully", resp);
         toast.success("user successfully created !", {
@@ -51,25 +46,36 @@ function UserData() {
         navigate("/");
       })
       .catch((err) => {
-        console.log(err.response.data.message, "eroor");
-        toast.error(err.response.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+        toast.error(err.response.data.message,{
+          position:toast.POSITION.TOP_RIGHT
+        })
+        console.log(err, "eroor");
       });
   }
+  useEffect(() => {
+    axios
+      .get(`http://localhost:3001/user/getOne/${routeParams.id}`)
+      .then((resp) => {
+        console.log(resp);
+        setData(resp.data.data[0]);
+        console.log(resp.data.data[0]);
+      })
+      .catch((er) => {
+        console.log("error ", er);
+      });
+  }, []);
 
   return (
     <div>
       <Formik
+        enableReinitialize={true}
         initialValues={{
-          username: "",
-          email: "",
-          name: "",
-          age: "",
-          gender: "",
-          passwd: "",
-          cpasswd: "",
-          myfile: "",
+          username: data.username,
+          email: data.email,
+          name: data.name,
+          age: data.age,
+          gender: data.gender,
+          myfile: data.image,
         }}
         validationSchema={validatio12}
         onSubmit={(values) => {
@@ -80,14 +86,31 @@ function UserData() {
         {({ errors, touched, setFieldValue, isSubmitting, values }) => (
           <Form action="" className="uploads-document-form">
             <div className="row">
-              <div className="col-12 m-4">
+              <div className="col-3 m-4">
+                <center>
+                  <div
+                    style={{
+                      border: "1px black solid",
+                      borderRadius: "25px",
+                      width: "150px",
+                      height: "150px",
+                    }}
+                  >
+                    <img
+                      src={`http://localhost:3001/${data.image}`}
+                      style={{ width: "100%" }}
+                      alt="image"
+                    />
+                  </div>
+                </center>
+              </div>
+              <div className="col-5 m-4" style={{ position: "sticky" }}>
                 <center>
                   <h4>User data</h4>
                 </center>
               </div>
-
               <div
-                className="col-7"
+                className="col-5"
                 style={{ marginLeft: "auto", marginRight: "auto" }}
               >
                 <div className="input-group mb-3">
@@ -168,32 +191,7 @@ function UserData() {
                     {errors.email}
                   </div>
                 ) : null}
-                <div className="input-group mb-3">
-                  <Field
-                    name="passwd"
-                    type="password"
-                    className="form-control"
-                    placeholder="password"
-                  />
-                </div>
-                {errors.passwd && touched.passwd ? (
-                  <div style={{ color: "red" }} className="mb-4">
-                    {errors.passwd}
-                  </div>
-                ) : null}
-                <div className="input-group mb-3">
-                  <Field
-                    name="cpasswd"
-                    type="password"
-                    className="form-control"
-                    placeholder="confirm password"
-                  />
-                </div>
-                {errors.cpasswd && touched.cpasswd ? (
-                  <div style={{ color: "red" }} className="mb-4">
-                    {errors.cpasswd}
-                  </div>
-                ) : null}
+
                 <div className="col-12">
                   <center>
                     <input
@@ -208,9 +206,8 @@ function UserData() {
           </Form>
         )}
       </Formik>
-      <ToastContainer />
     </div>
   );
 }
 
-export default UserData;
+export default UpdateUser;
