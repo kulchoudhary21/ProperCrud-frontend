@@ -3,29 +3,55 @@ import * as Yup from "yup";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router";
 import { useEffect, useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
+import Loader from "../loader/Loader";
 import "react-toastify/dist/ReactToastify.css";
+
+// const MAX_FILE_SIZE = 1024000;
+const validFileExtensions = {
+  image: ["jpg", "gif", "png", "jpeg", "svg", "webp", "avif"],
+};
+function isValidFileType(fileName, fileType) {
+  console.log("filename", fileName);
+  console.log("fileType", fileType);
+  if (fileName) {
+    return (
+      fileName &&
+      validFileExtensions[fileType].indexOf(fileName.split(".").pop()) > -1
+    );
+  } else {
+    return true;
+  }
+}
 
 const validatio12 = Yup.object().shape({
   username: Yup.string()
-    .min(10, "too short min length 10")
-    .required("Username is Required"),
+    .matches(/^([a-z][a-z0-9@._]*$)/, "Enter valid user it contains only @_.")
+    .min(10, "Too short min length 10")
+    .required("Username is required"),
   name: Yup.string().required("Name is required"),
   email: Yup.string().email().required("email is Required"),
-  age: Yup.string()
-    .min(0, "too short")
-    .max(5, "too long")
-    .required("age is Required"),
+  age: Yup.string().required("age is Required"),
   gender: Yup.string().required("gender is Required"),
-  myfile: Yup.string().required("Image must be required"),
+  myfile: Yup.mixed()
+    .test("is-valid-type", "Not a valid image type", (value) =>
+      isValidFileType(value && value.name, "image")
+    )
+    // .test(
+    //   "is-valid-size",
+    //   "Max allowed size is 100KB",
+    //   (value) => value && value.size <= MAX_FILE_SIZE
+    // ),
 });
-
 function UpdateUser() {
   const [data, setData] = useState({});
+  const [loader, setLoader] = useState();
+  const [render,setRender]=useState(false);
+
   const navigate = useNavigate();
   const routeParams = useParams();
-
   function createData(data1) {
+    setLoader(true);
     console.log("data", data1);
     const Formdata = new FormData();
     Formdata.append("username", data1.username);
@@ -40,15 +66,15 @@ function UpdateUser() {
       .put("http://localhost:3001/user/update", Formdata)
       .then((req, resp) => {
         console.log("Created succesfully", resp);
-        toast.success("user successfully created !", {
+        toast.success("updated successfully !", {
           position: toast.POSITION.TOP_CENTER,
         });
         navigate("/");
       })
       .catch((err) => {
-        toast.error(err.response.data.message,{
-          position:toast.POSITION.TOP_RIGHT
-        })
+        toast.error(err.response.data.message, {
+          position: toast.POSITION.TOP_RIGHT,
+        });
         console.log(err, "eroor");
       });
   }
@@ -58,10 +84,13 @@ function UpdateUser() {
       .then((resp) => {
         console.log(resp);
         setData(resp.data.data[0]);
-        console.log(resp.data.data[0]);
+        console.log("dfdf", resp.data.data[0]);
       })
-      .catch((er) => {
-        console.log("error ", er);
+      .catch((err) => {
+        console.log("error ", err);
+        toast.error(err.message, {
+          position: toast.POSITION.TOP_CENTER,
+        });
       });
   }, []);
 
@@ -98,7 +127,13 @@ function UpdateUser() {
                   >
                     <img
                       src={`http://localhost:3001/${data.image}`}
-                      style={{ width: "100%" }}
+                      style={{
+                        width: "100%",
+                        border: "1px black solid",
+                        borderRadius: "25px",
+                        width: "150px",
+                        height: "150px",
+                      }}
                       alt="image"
                     />
                   </div>
@@ -143,9 +178,9 @@ function UpdateUser() {
                 <div className="input-group mb-3">
                   <Field
                     name="age"
-                    type="number"
+                    type="date"
                     className="form-control"
-                    placeholder="your Age"
+                    placeholder="date of birth"
                   />
                 </div>
                 {errors.age && touched.age ? (
@@ -193,13 +228,33 @@ function UpdateUser() {
                 ) : null}
 
                 <div className="col-12">
-                  <center>
-                    <input
-                      type="submit"
-                      className="btn btn-primary"
-                      value="Submit"
-                    />
-                  </center>
+                  <div className="row">
+                    <div className="col">
+                      <center>
+                        {loader ? (
+                          <Loader />
+                        ) : (
+                          <input
+                            type="submit"
+                            className="btn btn-primary"
+                            value="Submit"
+                          />
+                        )}
+                      </center>
+                    </div>
+                    <div className="col">
+                      <center>
+                        <input
+                          type="button"
+                          className="btn btn-primary"
+                          value="Cancel"
+                          onClick={() => {
+                            navigate("/");
+                          }}
+                        />
+                      </center>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

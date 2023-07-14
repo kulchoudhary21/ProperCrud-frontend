@@ -4,19 +4,44 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router";
+import Loader from "../loader/Loader";
+import { useState } from "react";
+
+const MAX_FILE_SIZE = 1024000; //110KB
+
+const validFileExtensions = {
+  image: ["jpg", "gif", "png", "jpeg", "svg", "webp", "avif"],
+};
+
+function isValidFileType(fileName, fileType) {
+  console.log("filename", fileName);
+  console.log("fileType", fileType);
+  return (
+    fileName &&
+    validFileExtensions[fileType].indexOf(fileName.split(".").pop()) > -1
+  );
+}
 
 const validatio12 = Yup.object().shape({
   username: Yup.string()
-    .min(10, "too short min length 10")
-    .required("Username is Required"),
+    .matches(/^([a-z][a-z0-9@._]*$)/, "Enter valid user it contains only @_.")
+    .min(10, "Too short min length 10")
+    .required("Username is required"),
   name: Yup.string().required("Name is required"),
-  email: Yup.string().email().required("email is Required"),
-  age: Yup.string()
-    .min(0, "too short")
-    .max(5, "too long")
-    .required("age is Required"),
-  gender: Yup.string().required("gender is Required"),
-  myfile: Yup.string().required("Image must be required"),
+  email: Yup.string().email().required("Email is required"),
+  age: Yup.string().required("Age is required"),
+  gender: Yup.string().required("Gender is required"),
+  myfile: Yup.mixed()
+    .required("Required")
+    .test("is-valid-type", "Not a valid image type", (value) =>
+      isValidFileType(value && value.name.toLowerCase(), "image")
+    )
+    .test(
+      "is-valid-size",
+      "Max allowed size is 100KB",
+      (value) => value && value.size <= MAX_FILE_SIZE
+    ),
+
   passwd: Yup.string()
     .required("Password is required")
     .matches(
@@ -29,7 +54,9 @@ const validatio12 = Yup.object().shape({
 });
 function UserData() {
   const navigate = useNavigate();
+  const [loader, setLoader] = useState();
   function createData(data) {
+    setLoader(true);
     console.log("data", data);
 
     const Formdata = new FormData();
@@ -49,6 +76,7 @@ function UserData() {
           position: toast.POSITION.TOP_CENTER,
         });
         navigate("/");
+        setLoader(false);
       })
       .catch((err) => {
         console.log(err.response.data.message, "eroor");
@@ -119,10 +147,11 @@ function UserData() {
                 ) : null}
                 <div className="input-group mb-3">
                   <Field
+                    placeholder="date of birth"
                     name="age"
-                    type="number"
+                    type="date"
                     className="form-control"
-                    placeholder="your Age"
+                    // placeholder="date of birth"
                   />
                 </div>
                 {errors.age && touched.age ? (
@@ -194,14 +223,34 @@ function UserData() {
                     {errors.cpasswd}
                   </div>
                 ) : null}
-                <div className="col-12">
-                  <center>
-                    <input
-                      type="submit"
-                      className="btn btn-primary"
-                      value="Submit"
-                    />
-                  </center>
+                <div className="col-12 m-4">
+                  <div className="row">
+                    <div className="col">
+                      <center>
+                        {loader ? (
+                          <Loader />
+                        ) : (
+                          <input
+                            type="submit"
+                            className="btn btn-primary"
+                            value="Submit"
+                          />
+                        )}
+                      </center>
+                    </div>
+                    <div className="col">
+                      <center>
+                        <input
+                          type="button"
+                          className="btn btn-primary"
+                          value="Cancel"
+                          onClick={() => {
+                            navigate("/");
+                          }}
+                        />
+                      </center>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
