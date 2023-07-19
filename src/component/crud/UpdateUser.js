@@ -1,103 +1,156 @@
 import { Field, Formik, Form } from "formik";
 import * as Yup from "yup";
-import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
+import { useNavigate, useParams } from "react-router";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import Loader from "../../loader/Loader";
+import getURl from "../../utils/constant";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router";
-import Loader from "../loader/Loader";
-import { useState } from "react";
+import { getApi, putApi } from "../../utils/apiUtils";
 
-const MAX_FILE_SIZE = 1024000; //110KB
-
+// const MAX_FILE_SIZE = 1024000;
 const validFileExtensions = {
   image: ["jpg", "gif", "png", "jpeg", "svg", "webp", "avif"],
 };
-
 function isValidFileType(fileName, fileType) {
   console.log("filename", fileName);
   console.log("fileType", fileType);
-  return (
-    fileName &&
-    validFileExtensions[fileType].indexOf(fileName.split(".").pop()) > -1
-  );
+  if (fileName) {
+    return (
+      fileName &&
+      validFileExtensions[fileType].indexOf(fileName.split(".").pop()) > -1
+    );
+  } else {
+    return true;
+  }
 }
-
 const validatio12 = Yup.object().shape({
   username: Yup.string()
-    .matches(/^([a-z][a-z0-9@._]*$)/, "Enter valid user it contains only @_.")
-    .min(10, "Too short min length 10")
-    .required("Username is required"),
-  name: Yup.string().required("Name is required"),
-  email: Yup.string().email().required("Email is required"),
-  age: Yup.string().required("Age is required"),
-  gender: Yup.string().required("Gender is required"),
-  myfile: Yup.mixed()
-    .required("Required")
-    .test("is-valid-type", "Not a valid image type", (value) =>
-      isValidFileType(value && value.name.toLowerCase(), "image")
-    )
-    .test(
-      "is-valid-size",
-      "Max allowed size is 100KB",
-      (value) => value && value.size <= MAX_FILE_SIZE
-    ),
-
-  passwd: Yup.string()
-    .required("Password is required")
-    .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!+@#\$%\^&\*])(?=.{8,})/,
-      "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character"
-    ),
-  cpasswd: Yup.string()
-    .required("Confirm password is required")
-    .oneOf([Yup.ref("passwd")], "Passwords do not match"),
+    .matches(/^([a-z][a-z0-9@._]*$)/, `${getURl.username_check}`)
+    .min(10, `${getURl.username_min_length}`)
+    .required(`${getURl.username_required}`),
+  name: Yup.string().required(`${getURl.name_required}`),
+  email: Yup.string().email().required(`${getURl.email_required}`),
+  age: Yup.string().required(`${getURl.age_required}`),
+  gender: Yup.string().required(`${getURl.gender_required}`),
+  myfile: Yup.mixed().test(
+    "is-valid-type",
+    `${getURl.image_check_type}`,
+    (value) => isValidFileType(value && value.name, "image")
+  ),
 });
-function UserData() {
-  const navigate = useNavigate();
+function UpdateUser() {
+  const [data, setData] = useState({});
   const [loader, setLoader] = useState();
-  function createData(data) {
-    setLoader(true);
-    console.log("data", data);
+  const [render, setRender] = useState(false);
+  const navigate = useNavigate();
+  const routeParams = useParams();
 
+  async function createData(data1) {
+    setLoader(true);
+    console.log("data", data1);
     const Formdata = new FormData();
-    Formdata.append("username", data.username);
-    Formdata.append("age", data.age);
-    Formdata.append("email", data.email);
-    Formdata.append("gender", data.gender);
-    Formdata.append("myfile", data.myfile);
-    Formdata.append("name", data.name);
-    Formdata.append("passwd", data.passwd);
-    console.log("for id", Formdata);
-    axios
-      .post("http://localhost:3001/user/create", Formdata)
-      .then((req, resp) => {
-        console.log("Created succesfully", resp);
-        toast.success("user successfully created !", {
+    Formdata.append("username", data1.username);
+    Formdata.append("age", data1.age);
+    Formdata.append("email", data1.email);
+    Formdata.append("gender", data1.gender);
+    Formdata.append("myfile", data1.myfile);
+    Formdata.append("name", data1.name);
+    Formdata.append("id", routeParams.id);
+
+    try {
+      const result = await putApi(
+        `${getURl.BASE_URL_USER}/update`,
+        Formdata,
+        true
+      );
+      console.log("res", result);
+      if (result.status === 200) {
+        toast.success("updated successfully !", {
           position: toast.POSITION.TOP_CENTER,
         });
         navigate("/");
         setLoader(false);
-      })
-      .catch((err) => {
-        console.log(err.response.data.message, "eroor");
-        toast.error(err.response.data.message, {
+      } else {
+        toast.error(result.response.data.message, {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+        setLoader(false);
+      }
+      setLoader(false);
+    } catch (err) {
+      console.log("ee", err);
+    }
+
+    // axios
+    //   .put("http://localhost:3001/user/update", Formdata)
+    //   .then((req, resp) => {
+    //     console.log("Created succesfully", resp);
+    //     toast.success("updated successfully !", {
+    //       position: toast.POSITION.TOP_CENTER,
+    //     });
+    //     navigate("/");
+    //   })
+    //   .catch((err) => {
+    //     navigate(`/updateData/${routeParams.id}`);
+    //     setRender(!render);
+    //     toast.error(err.response.data.message, {
+    //       position: toast.POSITION.TOP_RIGHT,
+    //     });
+    //     setLoader(false);
+    //     console.log(err, "eroor");
+    //   });
+  }
+  async function getSingleDataUSer() {
+    try {
+      console.log("idd", routeParams.id);
+      const result = await getApi(
+        `${getURl.BASE_URL_USER}/getOne/${routeParams.id}`,
+        true
+      );
+      console.log("result...", result);
+      if (result.status === 200) {
+        setData(result.data.data[0]);
+        setLoader(false);
+      } else {
+        toast.error(result.message, {
           position: toast.POSITION.TOP_CENTER,
         });
-      });
+      }
+      setLoader(false);
+    } catch (err) {
+      console.log("ee", err);
+    }
   }
+  useEffect(() => {
+    getSingleDataUSer();
+
+    // axios
+    //   .get(`http://localhost:3001/user/getOne/${routeParams.id}`)
+    //   .then((resp) => {
+    //     console.log(resp);
+    //     setData(resp.data.data[0]);
+    //     console.log("dfdf", resp.data.data[0]);
+    //   })
+    //   .catch((err) => {
+    //     console.log("error ", err);
+    //     toast.error(err.message, {
+    //       position: toast.POSITION.TOP_CENTER,
+    //     });
+    //   });
+  }, []);
 
   return (
     <div>
       <Formik
+        enableReinitialize={true}
         initialValues={{
-          username: "",
-          email: "",
-          name: "",
-          age: "",
-          gender: "",
-          passwd: "",
-          cpasswd: "",
-          myfile: "",
+          username: data.username,
+          email: data.email,
+          name: data.name,
+          age: data.age,
+          gender: data.gender,
+          myfile: data.image,
         }}
         validationSchema={validatio12}
         onSubmit={(values) => {
@@ -108,14 +161,37 @@ function UserData() {
         {({ errors, touched, setFieldValue, isSubmitting, values }) => (
           <Form action="" className="uploads-document-form">
             <div className="row">
-              <div className="col-12 m-4">
+              <div className="col-3 m-4">
+                <center>
+                  <div
+                    style={{
+                      border: "1px black solid",
+                      borderRadius: "25px",
+                      width: "150px",
+                      height: "150px",
+                    }}
+                  >
+                    <img
+                      src={`http://localhost:3001/userDataImages/${data.image}`}
+                      style={{
+                        width: "100%",
+                        border: "1px black solid",
+                        borderRadius: "25px",
+                        width: "150px",
+                        height: "150px",
+                      }}
+                      alt="image"
+                    />
+                  </div>
+                </center>
+              </div>
+              <div className="col-5 m-4" style={{ position: "sticky" }}>
                 <center>
                   <h4>User data</h4>
                 </center>
               </div>
-
               <div
-                className="col-7"
+                className="col-5"
                 style={{ marginLeft: "auto", marginRight: "auto" }}
               >
                 <div className="input-group mb-3">
@@ -147,11 +223,10 @@ function UserData() {
                 ) : null}
                 <div className="input-group mb-3">
                   <Field
-                    placeholder="date of birth"
                     name="age"
                     type="date"
                     className="form-control"
-                    // placeholder="date of birth"
+                    placeholder="date of birth"
                   />
                 </div>
                 {errors.age && touched.age ? (
@@ -197,33 +272,8 @@ function UserData() {
                     {errors.email}
                   </div>
                 ) : null}
-                <div className="input-group mb-3">
-                  <Field
-                    name="passwd"
-                    type="password"
-                    className="form-control"
-                    placeholder="password"
-                  />
-                </div>
-                {errors.passwd && touched.passwd ? (
-                  <div style={{ color: "red" }} className="mb-4">
-                    {errors.passwd}
-                  </div>
-                ) : null}
-                <div className="input-group mb-3">
-                  <Field
-                    name="cpasswd"
-                    type="password"
-                    className="form-control"
-                    placeholder="confirm password"
-                  />
-                </div>
-                {errors.cpasswd && touched.cpasswd ? (
-                  <div style={{ color: "red" }} className="mb-4">
-                    {errors.cpasswd}
-                  </div>
-                ) : null}
-                <div className="col-12 m-4">
+
+                <div className="col-12">
                   <div className="row">
                     <div className="col">
                       <center>
@@ -257,9 +307,8 @@ function UserData() {
           </Form>
         )}
       </Formik>
-      <ToastContainer />
     </div>
   );
 }
 
-export default UserData;
+export default UpdateUser;

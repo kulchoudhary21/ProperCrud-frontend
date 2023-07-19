@@ -1,13 +1,13 @@
 /* eslint-disable jsx-a11y/img-redundant-alt */
-import axios from "axios";
 import moment from "moment";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import ReactPaginate from "react-paginate";
 import Spinner from "react-bootstrap/Spinner";
-import Loader from "../loader/Loader";
+import { deletApi, postApi } from "../../utils/apiUtils";
+import getURl from "../../utils/constant";
 function Home() {
   const navigate = useNavigate();
   const [udata, setUdata] = useState();
@@ -29,47 +29,83 @@ function Home() {
     setPageNumber(0);
     setRender(!render);
   }
-  function getUserData() {
+  async function getUserData() {
     setLoader(true);
     let data = { search: serachData, pageNumber: pageNumber };
     console.log("pageNumber", pageNumber);
 
-    axios
-      .post("http://localhost:3001/user/get", data)
-      .then((data) => {
-        console.log("userdata", data.data.data);
-        setUdata(data.data.data);
-        setCount(data.data.count);
+    try {
+      const result = await postApi(`${getURl.BASE_URL_USER}/get`, data, true);
+      console.log("res11", result);
+      if (result.status === 200) {
+        console.log("tryueue");
+        console.log("userdata", result.data.data);
+        setUdata(result.data.data);
+        setCount(result.data.count);
         setLoader(false);
-      })
-      .catch((err) => {
-        console.log("err", err);
-        toast.error(err.message, {
+      } else {
+        toast.error(result.message, {
           position: toast.POSITION.TOP_CENTER,
         });
-      });
+        setLoader(false);
+      }
+      setLoader(false);
+    } catch (err) {
+      console.log("ee", err);
+    }
+
   }
-  function deleteUser(id) {
-    axios
-      .delete(`http://localhost:3001/user/delete/${id}`)
-      .then((data) => {
+  async function deleteUser(id) {
+    try {
+      const result = await deletApi(
+        `${getURl.BASE_URL_USER}/delete/${id}`,
+        true
+      );
+      console.log("res11", result);
+      if (result.status === 200) {
         setRender(!render);
         toast.success("user Successfully deleted !", {
           position: toast.POSITION.TOP_CENTER,
         });
-        console.log(data);
-      })
-      .catch((err) => {
-        toast.error(err.response.data.message, {
+        console.log(result);
+      } else {
+        toast.error(result.response.data.message, {
           position: toast.POSITION.TOP_CENTER,
         });
-        console.log("err in delete:", err.response.data.message);
-      });
+        console.log("err in delete:", result.response.data.message);
+      }
+      setLoader(false);
+    } catch (err) {
+      console.log("ee", err);
+    }
+
   }
   return (
     <div>
       <div className="row">
-        <div className="col-6">
+        <div className="col-2">
+          <button
+            type="button"
+            className="btn btn-primary m-2"
+            onClick={() => {
+              navigate("/login");
+            }}
+          >
+            Login
+          </button>
+        </div>
+        <div className="col-2">
+          <button
+            type="button"
+            className="btn btn-primary m-2"
+            onClick={() => {
+              navigate("/redux");
+            }}
+          >
+            Redux
+          </button>
+        </div>
+        <div className="col-2">
           <button
             type="button"
             className="btn btn-primary m-2"
@@ -140,7 +176,7 @@ function Home() {
                               }}
                             >
                               <img
-                                src={`http://localhost:3001/${item.image}`}
+                                src={`http://localhost:3001/userDataImages/${item.image}`}
                                 style={{
                                   width: "35px",
                                   height: "35px",
@@ -214,7 +250,6 @@ function Home() {
           breakLinkClassName={"page-link"}
           activeClassName={"active"}
         />
-        <ToastContainer />
       </div>
       <div
         class="modal fade"

@@ -1,110 +1,115 @@
 import { Field, Formik, Form } from "formik";
 import * as Yup from "yup";
-import axios from "axios";
-import { useNavigate, useParams } from "react-router";
-import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import Loader from "../loader/Loader";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router";
+import Loader from "../../loader/Loader";
+import { useState } from "react";
+import getURl from "../../utils/constant";
+import { postApi } from "../../utils/apiUtils";
 
-// const MAX_FILE_SIZE = 1024000;
+const MAX_FILE_SIZE = 1024000; //110KB
+
 const validFileExtensions = {
   image: ["jpg", "gif", "png", "jpeg", "svg", "webp", "avif"],
 };
+
 function isValidFileType(fileName, fileType) {
   console.log("filename", fileName);
   console.log("fileType", fileType);
-  if (fileName) {
-    return (
-      fileName &&
-      validFileExtensions[fileType].indexOf(fileName.split(".").pop()) > -1
-    );
-  } else {
-    return true;
-  }
+  return (
+    fileName &&
+    validFileExtensions[fileType].indexOf(fileName.split(".").pop()) > -1
+  );
 }
 
 const validatio12 = Yup.object().shape({
   username: Yup.string()
-    .matches(/^([a-z][a-z0-9@._]*$)/, "Enter valid user it contains only @_.")
-    .min(10, "Too short min length 10")
-    .required("Username is required"),
-  name: Yup.string().required("Name is required"),
-  email: Yup.string().email().required("email is Required"),
-  age: Yup.string().required("age is Required"),
-  gender: Yup.string().required("gender is Required"),
+    .matches(/^([a-z][a-z0-9@._]*$)/, `${getURl.username_check}`)
+    .min(10, `${getURl.username_min_length}`)
+    .required(`${getURl.username_required}`),
+  name: Yup.string().required(`${getURl.name_required}`),
+  email: Yup.string().email().required(`${getURl.email_required}`),
+  age: Yup.string().required(`${getURl.age_required}`),
+  gender: Yup.string().required(`${getURl.gender_required}`),
+  userType: Yup.string().required(`${getURl.userType_required}`),
   myfile: Yup.mixed()
-    .test("is-valid-type", "Not a valid image type", (value) =>
-      isValidFileType(value && value.name, "image")
+    .required(`${getURl.image_required}`)
+    .test("is-valid-type", `${getURl.image_check_type}`, (value) =>
+      isValidFileType(value && value.name.toLowerCase(), "image")
     )
-    // .test(
-    //   "is-valid-size",
-    //   "Max allowed size is 100KB",
-    //   (value) => value && value.size <= MAX_FILE_SIZE
-    // ),
-});
-function UpdateUser() {
-  const [data, setData] = useState({});
-  const [loader, setLoader] = useState();
-  const [render,setRender]=useState(false);
+    .test(
+      "is-valid-size",
+      `${getURl.image_check_size}`,
+      (value) => value && value.size <= MAX_FILE_SIZE
+    ),
 
+  passwd: Yup.string()
+    .required(`${getURl.passwd_required}`)
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!+@#\$%\^&\*])(?=.{8,})/, 
+      `${getURl.passwd_check}`
+    ),
+  cpasswd: Yup.string()
+    .required(`${getURl.cpasswd_required}`)
+    .oneOf([Yup.ref("passwd")], `${getURl.cpasswd_match}`),
+});
+function UserData() {
   const navigate = useNavigate();
-  const routeParams = useParams();
-  function createData(data1) {
+  const [loader, setLoader] = useState();
+  console.log(getURl);
+  async function createData(data) {
     setLoader(true);
-    console.log("data", data1);
+    console.log("data", data);
+
     const Formdata = new FormData();
-    Formdata.append("username", data1.username);
-    Formdata.append("age", data1.age);
-    Formdata.append("email", data1.email);
-    Formdata.append("gender", data1.gender);
-    Formdata.append("myfile", data1.myfile);
-    Formdata.append("name", data1.name);
-    Formdata.append("id", routeParams.id);
+    Formdata.append("username", data.username);
+    Formdata.append("age", data.age);
+    Formdata.append("email", data.email);
+    Formdata.append("userType", data.userType);
+    Formdata.append("gender", data.gender);
+    Formdata.append("myfile", data.myfile);
+    Formdata.append("name", data.name);
+    Formdata.append("passwd", data.passwd);
     console.log("for id", Formdata);
-    axios
-      .put("http://localhost:3001/user/update", Formdata)
-      .then((req, resp) => {
-        console.log("Created succesfully", resp);
-        toast.success("updated successfully !", {
+    try {
+      const result = await postApi(
+        `${getURl.BASE_URL_USER}/create`,
+        Formdata,
+        true
+      );
+      console.log("res", result);
+      if (result.status === 200) {
+        toast.success("user successfully created !", {
           position: toast.POSITION.TOP_CENTER,
         });
-        navigate("/");
-      })
-      .catch((err) => {
-        toast.error(err.response.data.message, {
-          position: toast.POSITION.TOP_RIGHT,
+        navigate("/login");
+        setLoader(false);
+      } else {
+        toast.error(result.response.data.message, {
+          position: toast.POSITION.TOP_CENTER,
         });
-        console.log(err, "eroor");
-      });
+        setLoader(false);
+      }
+      setLoader(false);
+    } catch (err) {
+      console.log("ee", err);
+    }
   }
-  useEffect(() => {
-    axios
-      .get(`http://localhost:3001/user/getOne/${routeParams.id}`)
-      .then((resp) => {
-        console.log(resp);
-        setData(resp.data.data[0]);
-        console.log("dfdf", resp.data.data[0]);
-      })
-      .catch((err) => {
-        console.log("error ", err);
-        toast.error(err.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
-      });
-  }, []);
 
   return (
     <div>
       <Formik
-        enableReinitialize={true}
         initialValues={{
-          username: data.username,
-          email: data.email,
-          name: data.name,
-          age: data.age,
-          gender: data.gender,
-          myfile: data.image,
+          username: "",
+          email: "",
+          name: "",
+          userType:'',
+          age: "",
+          gender: "",
+          passwd: "",
+          cpasswd: "",
+          myfile: "",
         }}
         validationSchema={validatio12}
         onSubmit={(values) => {
@@ -115,37 +120,14 @@ function UpdateUser() {
         {({ errors, touched, setFieldValue, isSubmitting, values }) => (
           <Form action="" className="uploads-document-form">
             <div className="row">
-              <div className="col-3 m-4">
+              <div className="col-12 m-4">
                 <center>
-                  <div
-                    style={{
-                      border: "1px black solid",
-                      borderRadius: "25px",
-                      width: "150px",
-                      height: "150px",
-                    }}
-                  >
-                    <img
-                      src={`http://localhost:3001/${data.image}`}
-                      style={{
-                        width: "100%",
-                        border: "1px black solid",
-                        borderRadius: "25px",
-                        width: "150px",
-                        height: "150px",
-                      }}
-                      alt="image"
-                    />
-                  </div>
+                  <h4>Registration</h4>
                 </center>
               </div>
-              <div className="col-5 m-4" style={{ position: "sticky" }}>
-                <center>
-                  <h4>User data</h4>
-                </center>
-              </div>
+
               <div
-                className="col-5"
+                className="col-7"
                 style={{ marginLeft: "auto", marginRight: "auto" }}
               >
                 <div className="input-group mb-3">
@@ -177,10 +159,11 @@ function UpdateUser() {
                 ) : null}
                 <div className="input-group mb-3">
                   <Field
+                    placeholder="date of birth"
                     name="age"
                     type="date"
                     className="form-control"
-                    placeholder="date of birth"
+                    // placeholder="date of birth"
                   />
                 </div>
                 {errors.age && touched.age ? (
@@ -188,9 +171,23 @@ function UpdateUser() {
                     {errors.age}
                   </div>
                 ) : null}
+
+                <div className="input-group mb-3">
+                  <Field as="select" name="userType" className="form-control">
+                    <option value="" disabled selected hidden>user type</option>
+                    <option value="shopOwner">shop owner</option>
+                    <option value="user">user</option>
+                  </Field>
+                </div>
+                {errors.userType && touched.userType ? (
+                  <div style={{ color: "red" }} className="mb-4">
+                    {errors.userType}
+                  </div>
+                ) : null}
+
                 <div className="input-group mb-3">
                   <Field as="select" name="gender" className="form-control">
-                    <option defaultValue="gender">selet gender</option>
+                    <option value="" disabled selected hidden>selet gender</option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                   </Field>
@@ -226,8 +223,33 @@ function UpdateUser() {
                     {errors.email}
                   </div>
                 ) : null}
-
-                <div className="col-12">
+                <div className="input-group mb-3">
+                  <Field
+                    name="passwd"
+                    type="password"
+                    className="form-control"
+                    placeholder="password"
+                  />
+                </div>
+                {errors.passwd && touched.passwd ? (
+                  <div style={{ color: "red" }} className="mb-4">
+                    {errors.passwd}
+                  </div>
+                ) : null}
+                <div className="input-group mb-3">
+                  <Field
+                    name="cpasswd"
+                    type="password"
+                    className="form-control"
+                    placeholder="confirm password"
+                  />
+                </div>
+                {errors.cpasswd && touched.cpasswd ? (
+                  <div style={{ color: "red" }} className="mb-4">
+                    {errors.cpasswd}
+                  </div>
+                ) : null}
+                <div className="col-12 m-4">
                   <div className="row">
                     <div className="col">
                       <center>
@@ -249,7 +271,7 @@ function UpdateUser() {
                           className="btn btn-primary"
                           value="Cancel"
                           onClick={() => {
-                            navigate("/");
+                            navigate("/login");
                           }}
                         />
                       </center>
@@ -265,4 +287,4 @@ function UpdateUser() {
   );
 }
 
-export default UpdateUser;
+export default UserData;
