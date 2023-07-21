@@ -81,25 +81,6 @@ function UpdateUser() {
     } catch (err) {
       console.log("ee", err);
     }
-
-    // axios
-    //   .put("http://localhost:3001/user/update", Formdata)
-    //   .then((req, resp) => {
-    //     console.log("Created succesfully", resp);
-    //     toast.success("updated successfully !", {
-    //       position: toast.POSITION.TOP_CENTER,
-    //     });
-    //     navigate("/");
-    //   })
-    //   .catch((err) => {
-    //     navigate(`/updateData/${routeParams.id}`);
-    //     setRender(!render);
-    //     toast.error(err.response.data.message, {
-    //       position: toast.POSITION.TOP_RIGHT,
-    //     });
-    //     setLoader(false);
-    //     console.log(err, "eroor");
-    //   });
   }
   async function getSingleDataUSer() {
     try {
@@ -124,20 +105,6 @@ function UpdateUser() {
   }
   useEffect(() => {
     getSingleDataUSer();
-
-    // axios
-    //   .get(`http://localhost:3001/user/getOne/${routeParams.id}`)
-    //   .then((resp) => {
-    //     console.log(resp);
-    //     setData(resp.data.data[0]);
-    //     console.log("dfdf", resp.data.data[0]);
-    //   })
-    //   .catch((err) => {
-    //     console.log("error ", err);
-    //     toast.error(err.message, {
-    //       position: toast.POSITION.TOP_CENTER,
-    //     });
-    //   });
   }, []);
 
   return (
@@ -213,7 +180,7 @@ function UpdateUser() {
                     name="name"
                     type="text"
                     className="form-control"
-                    placeholder="your name"
+                    placeholder="Your Name"
                   />
                 </div>
                 {errors.name && touched.name ? (
@@ -226,7 +193,7 @@ function UpdateUser() {
                     name="age"
                     type="date"
                     className="form-control"
-                    placeholder="date of birth"
+                    placeholder="Date of Birth"
                   />
                 </div>
                 {errors.age && touched.age ? (

@@ -26,6 +26,7 @@ const validatio12 = Yup.object().shape({
   productName: Yup.string().required(`${getURl.productName}`),
   productModel: Yup.string().required(`${getURl.productModel}`),
   productTitle: Yup.string().required(`${getURl.productTitle}`),
+  price: Yup.number().required(`${getURl.price}`).min(0, `${getURl.min_price}`),
   myfile: Yup.mixed().test(
     "is-valid-type",
     `${getURl.image_check_type}`,
@@ -47,6 +48,7 @@ function EditProduct() {
     Formdata.append("productName", data1.productName);
     Formdata.append("productModel", data1.productModel);
     Formdata.append("productTitle", data1.productTitle);
+    Formdata.append("price", data1.price);
     Formdata.append("myfile", data1.myfile);
     console.log("for id", Formdata);
 
@@ -107,6 +109,7 @@ function EditProduct() {
           productName: data.productName,
           productModel: data.productModel,
           productTitle: data.productTitle,
+          price: data.price,
           myfile: data.image,
         }}
         validationSchema={validatio12}
@@ -156,7 +159,7 @@ function EditProduct() {
                     name="productName"
                     type="text"
                     className="form-control"
-                    placeholder="product name"
+                    placeholder="Product name"
                   />
                 </div>
                 {errors.productName && touched.productName ? (
@@ -170,7 +173,7 @@ function EditProduct() {
                     name="productModel"
                     type="text"
                     className="form-control"
-                    placeholder="model name"
+                    placeholder="Model name"
                   />
                 </div>
                 {errors.productModel && touched.productModel ? (
@@ -183,12 +186,27 @@ function EditProduct() {
                     name="productTitle"
                     type="text"
                     className="form-control"
-                    placeholder="product title"
+                    placeholder="Product title"
                   />
                 </div>
                 {errors.productTitle && touched.productTitle ? (
                   <div style={{ color: "red" }} className="mb-4">
                     {errors.productTitle}
+                  </div>
+                ) : null}
+
+                <div className="input-group mb-3">
+                  <Field
+                    placeholder="Price"
+                    name="price"
+                    type="number"
+                    className="form-control"
+                    min="0"
+                  />
+                </div>
+                {errors.price && touched.price ? (
+                  <div style={{ color: "red" }} className="mb-4">
+                    {errors.price}
                   </div>
                 ) : null}
 

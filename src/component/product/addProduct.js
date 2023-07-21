@@ -7,7 +7,7 @@ import { useNavigate } from "react-router";
 import getURl from "../../utils/constant";
 import { postApi } from "../../utils/apiUtils";
 import decryptCrypto from "../../utils/decryptCrypto";
-
+import { useSelector, useDispatch } from "react-redux";
 const MAX_FILE_SIZE = 1024000; //110KB
 
 const validFileExtensions = {
@@ -25,6 +25,7 @@ const validatio12 = Yup.object().shape({
   productName: Yup.string().required(`${getURl.productName}`),
   productModel: Yup.string().required(`${getURl.productModel}`),
   productTitle: Yup.string().required(`${getURl.productTitle}`),
+  price: Yup.number().required(`${getURl.price}`).min(0,`${getURl.min_price}`),
   myfile: Yup.mixed()
     .required(`${getURl.image_required}`)
     .test("is-valid-type", `${getURl.image_check_type}`, (value) =>
@@ -38,20 +39,23 @@ const validatio12 = Yup.object().shape({
 });
 
 function AddProduct() {
+  const dispatch = useDispatch();
+  const count = useSelector((state) => state.isLogin.value);
   const navigate = useNavigate();
   const [loader, setLoader] = useState();
   console.log(getURl);
   async function createProduct(data) {
     setLoader(true);
     const userInfo = await decryptCrypto();
-    console.log("userid",userInfo.id)
+    console.log("userid", userInfo.id);
     const Formdata = new FormData();
     Formdata.append("shopOwnerId", userInfo.id);
     Formdata.append("productName", data.productName);
     Formdata.append("productModel", data.productModel);
     Formdata.append("productTitle", data.productTitle);
+    Formdata.append("price", data.price);
     Formdata.append("myfile", data.myfile);
-    console.log("for id", Formdata);
+    console.log("for id", await Formdata);
     try {
       const result = await postApi(
         `${getURl.BASE_URL_PRODUCT}/addProduct`,
@@ -63,7 +67,7 @@ function AddProduct() {
         toast.success("product successfully added !", {
           position: toast.POSITION.TOP_CENTER,
         });
-        navigate("/addProduct");
+        navigate("/product");
         setLoader(false);
       } else {
         toast.error(result.response.data.message, {
@@ -83,12 +87,14 @@ function AddProduct() {
           productName: "",
           productModel: "",
           productTitle: "",
+          price: "",
           myfile: "",
         }}
         validationSchema={validatio12}
         onSubmit={(values) => {
           console.log("values20", values);
           createProduct(values);
+
         }}
       >
         {({ errors, touched, setFieldValue, isSubmitting, values }) => (
@@ -109,7 +115,7 @@ function AddProduct() {
                     name="productName"
                     type="text"
                     className="form-control"
-                    placeholder="product"
+                    placeholder="Product"
                   />
                 </div>
                 {errors.productName && touched.productName ? (
@@ -123,7 +129,7 @@ function AddProduct() {
                     name="productModel"
                     type="text"
                     className="form-control"
-                    placeholder="model"
+                    placeholder="Model name"
                   />
                 </div>
                 {errors.productModel && touched.productModel ? (
@@ -133,7 +139,7 @@ function AddProduct() {
                 ) : null}
                 <div className="input-group mb-3">
                   <Field
-                    placeholder="product title"
+                    placeholder="Product title"
                     name="productTitle"
                     type="text"
                     className="form-control"
@@ -144,7 +150,20 @@ function AddProduct() {
                     {errors.productTitle}
                   </div>
                 ) : null}
-
+                <div className="input-group mb-3">
+                  <Field
+                    placeholder="Price"
+                    name="price"
+                    type="number"
+                    className="form-control"
+                    min="0"
+                  />
+                </div>
+                {errors.price && touched.price ? (
+                  <div style={{ color: "red" }} className="mb-4">
+                    {errors.price}
+                  </div>
+                ) : null}
                 <label className="m-2 mb-3"> image</label>
 
                 <label className="inputfile-label" htmlFor="file-1">

@@ -5,14 +5,16 @@ import "react-toastify/dist/ReactToastify.css";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import ReactPaginate from "react-paginate";
-import Spinner from "react-bootstrap/Spinner";
 import { deletApi, postApi } from "../../utils/apiUtils";
 import getURl from "../../utils/constant";
 import { ListGroup } from "react-bootstrap";
-import Modal from "react-bootstrap/Modal";
-
+import { useSelector, useDispatch } from "react-redux";
+import decryptCrypto from "../../utils/decryptCrypto";
+import { setIsLogin } from "../store/isLoginSlice";
 function GetProduct() {
-  const [show, setShow] = useState(false);
+  const [userInfoToken, setUserInfoToken] = useState();
+  const dispatch = useDispatch();
+  const checker = useSelector((state) => state.isLogin.value);
   const navigate = useNavigate();
   const [udata, setUdata] = useState();
   const [serachData, setSearchData] = useState();
@@ -34,24 +36,28 @@ function GetProduct() {
     setRender(!render);
   }
   async function getProductData() {
-    setLoader(true);
-    let data = { search: serachData, pageNumber: pageNumber };
-    console.log("pageNumber", pageNumber);
-
     try {
+      setUserInfoToken(await decryptCrypto());
+      setLoader(true);
+      let data = { search: serachData, pageNumber: pageNumber };
+      console.log("pageNumber", pageNumber);
+
       const result = await postApi(
         `${getURl.BASE_URL_PRODUCT}/getProduct`,
         data,
         true
       );
-      console.log("res11", result);
+      console.log("res11", userInfoToken);
       if (result.status === 200) {
         console.log("tryueue");
         console.log("userdata", result.data.data);
         setUdata(result.data.data);
         setCount(result.data.count);
         setLoader(false);
+        dispatch(setIsLogin(!checker));
+        console.log("ddaattaa", udata);
       } else {
+        // dispatch(setIsLogin(!checker));
         toast.error(result.message, {
           position: toast.POSITION.TOP_CENTER,
         });
@@ -62,15 +68,16 @@ function GetProduct() {
       console.log("ee", err);
     }
   }
+
   async function deleteUser(id) {
     try {
       const result = await deletApi(
         `${getURl.BASE_URL_PRODUCT}/deleteProduct/${id}`,
         true
       );
+      setRender(!render);
       console.log("res11", result);
       if (result.status === 200) {
-        setRender(!render);
         toast.success("user Successfully deleted !", {
           position: toast.POSITION.TOP_CENTER,
         });
@@ -86,6 +93,38 @@ function GetProduct() {
       console.log("ee", err);
     }
   }
+
+  async function createCart(productId) {
+    try {
+      const userId = await userInfoToken.id;
+      const Formdata = new FormData();
+      Formdata.append("userId", userId);
+      Formdata.append("productId", productId);
+      const result = await postApi(
+        `${getURl.BASE_URL_CART}/addCart`,
+        Formdata,
+        true
+      );
+      console.log("res_in", result);
+      // setRender(!render);
+      if (result.status === 200) {
+        toast.success("product added to cart!", {
+          position: toast.POSITION.TOP_CENTER,
+        });
+        // navigate("/product");
+        dispatch(setIsLogin(!checker));
+        setLoader(false);
+      } else {
+        toast.error(result.response.data.message, {
+          position: toast.POSITION.TOP_CENTER,
+        });
+        setLoader(false);
+      }
+      setLoader(false);
+    } catch (err) {
+      console.log("ee", err);
+    }
+  }
   return (
     <div>
       <div
@@ -95,13 +134,13 @@ function GetProduct() {
         <input
           className="form-control me-2"
           type="search"
-          placeholder="Search by name/title"
+          placeholder="Search by Name/Title"
           onChange={(e) => {
             setSearchData(e.target.value);
           }}
         />
         <button
-          class="btn btn-primary"
+          className="btn btn-primary"
           type="submit"
           onClick={() => onClickHandler()}
         >
@@ -115,88 +154,125 @@ function GetProduct() {
           >
             {udata.map((item, index) => {
               return (
-                <Card
-                  style={{ width: "13rem", margin: "20px" }}
-                  className="shadow-lg bg-white rounded border"
-                >
-                  <Card.Img
-                    className="rounded"
-                    variant="top"
-                    src={`http://localhost:3001/productDataImages/${item.image}`}
-                    style={{ width: "13rem", height: "13rem", }}
-                  />
-                  <Card.Body>
-                    <ListGroup className="list-group-flush">
-                      <ListGroup.Item>
-                        <Card.Title>name : {item.productName}</Card.Title>
-                      </ListGroup.Item>
-                      <ListGroup.Item>
-                        model : {item.productModel}
-                      </ListGroup.Item>
-                      <ListGroup.Item>
-                        desc : {item.productTitle}
-                      </ListGroup.Item>
-                    </ListGroup>
-                    <div className="mt-2">
-                      <Button
-                        variant="primary"
-                        style={{ marginRight: "10%" }}
-                        onClick={() => {
-                          navigate(`/updateProduct/${item.id}`);
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="primary"
-                        onClick={() => {
-                          setDeleteId(item.id);
-                          setShow(true);
-                        }}
-                        data-bs-toggle="modal"
-                        data-bs-target="#exampleModal"
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </Card.Body>
-                </Card>
+                <div>
+                  <Card
+                    style={{ width: "13rem", margin: "20px" }}
+                    className="shadow-lg bg-white rounded border"
+                    key={index}
+                  >
+                    <Card.Img
+                      className="rounded"
+                      variant="top"
+                      src={`http://localhost:3001/productDataImages/${item.image}`}
+                      style={{ width: "13rem", height: "13rem" }}
+                    />
+                    <Card.Body>
+                      <ListGroup className="list-group-flush">
+                        {userInfoToken.userType === "admin" ? (
+                          <>
+                            <ListGroup.Item>
+                              user : {item.userdatum.name}
+                            </ListGroup.Item>
+                          </>
+                        ) : null}
+                        <ListGroup.Item>
+                          <Card.Text>
+                            <h6>name : {item.productName}</h6>
+                          </Card.Text>
+                        </ListGroup.Item>
+                        <ListGroup.Item>
+                          model : {item.productModel}
+                        </ListGroup.Item>
+                        <ListGroup.Item>
+                          desc : {item.productTitle}
+                        </ListGroup.Item>
+                        <ListGroup.Item>price : {item.price}</ListGroup.Item>
+                      </ListGroup>
+                      {userInfoToken &&
+                      userInfoToken.userType === "shopOwner" ? (
+                        <>
+                          <div className="mt-2">
+                            <Button
+                              variant="primary"
+                              style={{ marginRight: "10%" }}
+                              onClick={() => {
+                                navigate(`/updateProduct/${item.id}`);
+                              }}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="primary"
+                              onClick={() => {
+                                setDeleteId(item.id);
+                              }}
+                              data-bs-toggle="modal"
+                              data-bs-target="#exampleModal"
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </>
+                      ) : null}
+                      {userInfoToken.userType === "user" ? (
+                        <>
+                          <div className="mt-2">
+                            <Button
+                              variant="primary"
+                              style={{ marginLeft: "20%" }}
+                              onClick={() => {
+                                // dispatch(setIsLogin(!checker));
+                                createCart(item.id);
+                                
+                              }}
+                            >
+                              Add to cart
+                            </Button>
+                          </div>
+                        </>
+                      ) : null}
+                    </Card.Body>
+                  </Card>
+                </div>
               );
             })}
           </div>
         ) : null}
       </div>
       <div
-        class="modal fade"
+        className="modal fade"
         id="exampleModal"
-        tabindex="-1"
+        tabIndex="-1"
         aria-labelledby="exampleModalLabel"
         aria-hidden="true"
       >
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
               <button
                 type="button"
-                class="btn-close"
+                className="btn-close"
                 data-bs-dismiss="modal"
                 aria-label="Close"
               ></button>
             </div>
-            <div class="modal-body">Are you sure you want to delete</div>
-            <div class="modal-footer">
+            <div className="modal-body">Are you sure you want to delete</div>
+            <div className="modal-footer">
               <button
                 type="button"
-                class="btn btn-secondary"
+                className="btn btn-secondary"
                 data-bs-dismiss="modal"
               >
                 No
               </button>
               <button
                 type="button"
-                class="btn btn-primary"
+                className="btn btn-primary"
                 data-bs-dismiss="modal"
-                onClick={() => deleteUser(deleteId)}
+                onClick={() => {
+                  deleteUser(deleteId);
+                  dispatch(setIsLogin(!checker));
+                }}
               >
                 yes
               </button>

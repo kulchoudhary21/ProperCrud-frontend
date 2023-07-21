@@ -1,6 +1,7 @@
 const getURl = {
   BASE_URL_USER: "http://localhost:3001/user",
   BASE_URL_PRODUCT: "http://localhost:3001/product",
+  BASE_URL_CART: "http://localhost:3001/usercart",
   cryptojs: "uewyhf84yhrt082",
 
   username_required: "Username is required",
@@ -14,7 +15,7 @@ const getURl = {
   age_required: "Age is required",
 
   gender_required: "Gender is required",
-  userType_required: "user type is required",
+  userType_required: "User type is required",
 
   image_required: "Image is required",
   image_check_type: "Not a valid image type",
@@ -27,8 +28,10 @@ const getURl = {
   cpasswd_required: "Confirm Password is required",
   cpasswd_match: "Passwords do not match",
   //-----product------------
-  productName: "product name is required",
-  productModel: "product model is required",
-  productTitle:"title is required"
+  productName: "Product name is required",
+  productModel: "Product model is required",
+  productTitle:"Title is required",
+  price:"Price is required",
+  min_price:'Price should not be less than 0'
 };
 export default getURl;

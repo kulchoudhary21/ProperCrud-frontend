@@ -7,9 +7,7 @@ import Loader from "../../loader/Loader";
 import { useState } from "react";
 import getURl from "../../utils/constant";
 import { postApi } from "../../utils/apiUtils";
-
 const MAX_FILE_SIZE = 1024000; //110KB
-
 const validFileExtensions = {
   image: ["jpg", "gif", "png", "jpeg", "svg", "webp", "avif"],
 };
@@ -43,7 +41,6 @@ const validatio12 = Yup.object().shape({
       `${getURl.image_check_size}`,
       (value) => value && value.size <= MAX_FILE_SIZE
     ),
-
   passwd: Yup.string()
     .required(`${getURl.passwd_required}`)
     .matches(
@@ -76,7 +73,7 @@ function UserData() {
       const result = await postApi(
         `${getURl.BASE_URL_USER}/create`,
         Formdata,
-        true
+        false
       );
       console.log("res", result);
       if (result.status === 200) {
@@ -96,7 +93,6 @@ function UserData() {
       console.log("ee", err);
     }
   }
-
   return (
     <div>
       <Formik
@@ -149,7 +145,7 @@ function UserData() {
                     name="name"
                     type="text"
                     className="form-control"
-                    placeholder="your name"
+                    placeholder="Your Name"
                   />
                 </div>
                 {errors.name && touched.name ? (
@@ -159,7 +155,7 @@ function UserData() {
                 ) : null}
                 <div className="input-group mb-3">
                   <Field
-                    placeholder="date of birth"
+                    placeholder="Date Of Birth"
                     name="age"
                     type="date"
                     className="form-control"
@@ -228,7 +224,7 @@ function UserData() {
                     name="passwd"
                     type="password"
                     className="form-control"
-                    placeholder="password"
+                    placeholder="Password"
                   />
                 </div>
                 {errors.passwd && touched.passwd ? (
@@ -241,7 +237,7 @@ function UserData() {
                     name="cpasswd"
                     type="password"
                     className="form-control"
-                    placeholder="confirm password"
+                    placeholder="Confirm password"
                   />
                 </div>
                 {errors.cpasswd && touched.cpasswd ? (

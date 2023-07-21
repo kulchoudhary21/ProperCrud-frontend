@@ -153,6 +153,7 @@ function Home() {
                       <th scope="col">Image</th>
                       <th scope="col">Username</th>
                       <th scope="col">Name</th>
+                      <th scope="col">User Type</th>
                       <th scope="col">Date of birth</th>
                       <th scope="col">Gender</th>
                       <th scope="col">Email</th>
@@ -190,6 +191,7 @@ function Home() {
                           </td>
                           <th>{item.username}</th>
                           <td>{item.name}</td>
+                          <td>{item.userType}</td>
                           <td>{item.age}</td>
                           <td>{item.gender}</td>
                           <td>{item.email}</td>

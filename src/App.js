@@ -10,12 +10,14 @@ import Header from "./component/head/header";
 import AddProduct from "./component/product/addProduct";
 import GetProduct from "./component/product/getProduct";
 import EditProduct from "./component/product/editProduct";
+import GetCart from "./component/usercart/getCart";
 function App() {
   return (
     <div>
       <BrowserRouter>
         <Header></Header>
         <Routes>
+          {/* <Route path="/" element={<DashBoard></DashBoard>}></Route> */}
           <Route path="/dash" element={<Home></Home>}></Route>
           <Route path="/login" element={<Login></Login>}></Route>
           <Route path="/register" element={<UserData></UserData>}></Route>
@@ -24,8 +26,12 @@ function App() {
             element={<UpdateUser></UpdateUser>}
           ></Route>
           <Route path="/addProduct" element={<AddProduct></AddProduct>}></Route>
-          <Route path="/product" element={<GetProduct></GetProduct >}></Route>
-          <Route path="/updateProduct/:id" element={<EditProduct></EditProduct >}></Route>
+          <Route path="/product" element={<GetProduct></GetProduct>}></Route>
+          <Route
+            path="/updateProduct/:id"
+            element={<EditProduct></EditProduct>}
+          ></Route>
+          <Route path="/showCart" element={<GetCart></GetCart>}></Route>
         </Routes>
         <ToastContainer />
       </BrowserRouter>

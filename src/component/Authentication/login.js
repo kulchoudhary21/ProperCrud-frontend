@@ -6,15 +6,18 @@ import { postApi } from "../../utils/apiUtils";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router";
-import CryptoJS from "crypto-js";
+import { useDispatch, useSelector } from "react-redux";
+import { setIsLogin } from "../store/isLoginSlice";
 
 const validatio12 = Yup.object().shape({
   username: Yup.string().required(`${getURl.username_required}`),
   passwd: Yup.string().required(`${getURl.passwd_required}`),
 });
 function Login() {
+  const count = useSelector((state) => state.isLogin.value);
+  const dispatch = useDispatch();
   const [loader, setLoader] = useState();
-  const[userType,setUserType]=useState();
+  const [userType, setUserType] = useState();
   const navigate = useNavigate();
   async function loginCheck(data) {
     const Formdata = new FormData();
@@ -25,7 +28,7 @@ function Login() {
       const result = await postApi(
         `${getURl.BASE_URL_USER}/login`,
         Formdata,
-        true
+        false
       );
       console.log("reslogin", result);
       if (result.status === 200) {
@@ -35,13 +38,15 @@ function Login() {
           position: toast.POSITION.TOP_CENTER,
         });
         setLoader(false);
-        navigate("/product")
+        dispatch(setIsLogin(!count));
+        navigate("/product");
       } else if (result.response.status === 404) {
-        toast.error("404 " + result.response.statusText, {
+        console.log("dddddddd1",result)
+        toast.error("404 " + result.response.data.message, {
           position: toast.POSITION.TOP_RIGHT,
         });
       } else {
-        console.log("erer");
+        console.log("dddddddd2",result)
         toast.error(result.response.data.message, {
           position: toast.POSITION.TOP_CENTER,
         });
@@ -49,6 +54,7 @@ function Login() {
       }
       setLoader(false);
     } catch (err) {
+      console.log("err.....",err)
       toast.error("Error 404", {
         position: toast.POSITION.TOP_CENTER,
       });
@@ -105,7 +111,7 @@ function Login() {
                     name="passwd"
                     type="password"
                     className="form-control"
-                    placeholder="password"
+                    placeholder="Password"
                   />
                 </div>
                 {errors.passwd && touched.passwd ? (
@@ -129,7 +135,7 @@ function Login() {
                     <input
                       type="submit"
                       className="btn btn-primary"
-                      value="Submit"
+                      value="Login"
                     />
                   </center>
                 </div>
@@ -140,7 +146,7 @@ function Login() {
                       className="btn btn-primary"
                       value="Cancel"
                       onClick={() => {
-                        navigate("/")
+                        navigate("/");
                       }}
                     />
                   </center>
