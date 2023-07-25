@@ -375,3 +375,56 @@ class APIUtil {
   }
 }
 export default new APIUtil();
+
+// async function getCount() {
+//   try {
+//     setUserInfoToken(await decryptCrypto());
+//     const result = await getApi(`${getURl.BASE_URL_CART}/getCountCart`, true);
+//     console.log("rrr..", result);
+
+//     if (result.status === 200) {
+//       console.log("tryueue");
+//       setCounter(result.data.count);
+//       console.log("cccccccc",cartCounter)
+//       dispatch((!checker));
+//     } else {
+//       toast.error(result.message, {
+//         position: toast.POSITION.TOP_CENTER,
+//       });
+//     }
+//   } catch (err) {
+//     console.log("in count", err);
+//   }
+// }
+
+
+// const order = await createOrder(params);
+    
+// const options: RazorpayOptions = {
+//   key: "YOUR_KEY_ID",
+//   amount: "3000",
+//   currency: "INR",
+//   name: "Acme Corp",
+//   description: "Test Transaction",
+//   image: "https://example.com/your_logo",
+//   order_id: order.id,
+//   handler: (res) => {
+//     console.log(res);
+//   },
+//   prefill: {
+//     name: "KULDEEP CHOUDHARY",
+//     email: "kul@gmail.com",
+//     contact: "9999999999",
+//   },
+//   notes: {
+//     address: "Razorpay Corporate Office",
+//   },
+//   theme: {
+//     color: "#3399cc",
+//   },
+// };
+
+// const rzpay = new Razorpay(options);
+// rzpay.open();
+// }, [Razorpay]);
+

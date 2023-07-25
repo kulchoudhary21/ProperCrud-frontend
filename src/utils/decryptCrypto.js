@@ -6,7 +6,7 @@ import getURl from "./constant"
     const bytes=await CryptoJS.AES.decrypt(encrptedUserInfo,getURl.cryptojs)
     const jdata=await bytes.toString(CryptoJS.enc.Utf8)
     const data=JSON.parse(jdata); 
-    return data
+    return await data
     }
     catch(err){
       console.log("err",err)

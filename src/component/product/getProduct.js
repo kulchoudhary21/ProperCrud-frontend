@@ -11,6 +11,7 @@ import { ListGroup } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
 import decryptCrypto from "../../utils/decryptCrypto";
 import { setIsLogin } from "../store/isLoginSlice";
+import { setCounter } from "../store/cartCounterSlice";
 function GetProduct() {
   const [userInfoToken, setUserInfoToken] = useState();
   const dispatch = useDispatch();
@@ -49,17 +50,17 @@ function GetProduct() {
       );
       console.log("res11", userInfoToken);
       if (result.status === 200) {
-        console.log("tryueue");
         console.log("userdata", result.data.data);
         setUdata(result.data.data);
         setCount(result.data.count);
-        setLoader(false);
+        console.log("chchchchchch", result.data.cartcount);
+        dispatch(setCounter(result.data.cartcount));
         dispatch(setIsLogin(!checker));
+        setLoader(false);
         console.log("ddaattaa", udata);
       } else {
-        // dispatch(setIsLogin(!checker));
         toast.error(result.message, {
-          position: toast.POSITION.TOP_CENTER,
+          position: toast.POSITION.TOP_RIGHT,
         });
         setLoader(false);
       }
@@ -68,7 +69,6 @@ function GetProduct() {
       console.log("ee", err);
     }
   }
-
   async function deleteUser(id) {
     try {
       const result = await deletApi(
@@ -78,13 +78,14 @@ function GetProduct() {
       setRender(!render);
       console.log("res11", result);
       if (result.status === 200) {
-        toast.success("user Successfully deleted !", {
-          position: toast.POSITION.TOP_CENTER,
+        toast.success("product Successfully deleted !", {
+          position: toast.POSITION.TOP_RIGHT,
         });
         console.log(result);
+        dispatch(setIsLogin(!checker));
       } else {
         toast.error(result.response.data.message, {
-          position: toast.POSITION.TOP_CENTER,
+          position: toast.POSITION.TOP_RIGHT,
         });
         console.log("err in delete:", result.response.data.message);
       }
@@ -106,17 +107,16 @@ function GetProduct() {
         true
       );
       console.log("res_in", result);
-      // setRender(!render);
       if (result.status === 200) {
         toast.success("product added to cart!", {
-          position: toast.POSITION.TOP_CENTER,
+          position: toast.POSITION.TOP_RIGHT,
         });
-        // navigate("/product");
+        setRender(!render)
         dispatch(setIsLogin(!checker));
         setLoader(false);
       } else {
         toast.error(result.response.data.message, {
-          position: toast.POSITION.TOP_CENTER,
+          position: toast.POSITION.TOP_RIGHT,
         });
         setLoader(false);
       }
@@ -129,7 +129,7 @@ function GetProduct() {
     <div>
       <div
         className="col-6 "
-        style={{ display: "flex", height: "fitContent", margin: "auto" }}
+        style={{ display: "flex", height: "fitContent", margin: "auto",marginBottom:"20px" }}
       >
         <input
           className="form-control me-2"
@@ -156,7 +156,7 @@ function GetProduct() {
               return (
                 <div>
                   <Card
-                    style={{ width: "13rem", margin: "20px" }}
+                    style={{ width: "13rem", height: "30rem", margin: "20px" }}
                     className="shadow-lg bg-white rounded border"
                     key={index}
                   >
@@ -221,9 +221,7 @@ function GetProduct() {
                               variant="primary"
                               style={{ marginLeft: "20%" }}
                               onClick={() => {
-                                // dispatch(setIsLogin(!checker));
                                 createCart(item.id);
-                                
                               }}
                             >
                               Add to cart
@@ -271,7 +269,7 @@ function GetProduct() {
                 data-bs-dismiss="modal"
                 onClick={() => {
                   deleteUser(deleteId);
-                  dispatch(setIsLogin(!checker));
+                  // dispatch(setIsLogin(!checker));
                 }}
               >
                 yes

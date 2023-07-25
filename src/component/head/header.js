@@ -5,9 +5,6 @@ import { setIsLogin } from "../store/isLoginSlice";
 import decryptCrypto from "../../utils/decryptCrypto";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Badge, Stack } from "@mui/material";
-import { getApi } from "../../utils/apiUtils";
-import getURl from "../../utils/constant";
-import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 function Header() {
   const navigate = useNavigate();
@@ -16,39 +13,34 @@ function Header() {
   const [cartCount, setCartCount] = useState(0);
   const dispatch = useDispatch();
   const count = useSelector((state) => state.isLogin.value);
+  const cartCounter = useSelector((state) => state.cartCounter.value);
   async function checkStatus() {
     setUserInfoToken(await decryptCrypto());
-    console.log(userInfoToken);
+    console.log("cartCount   ---", cartCounter);
+    console.log();
     const userInfo = localStorage.getItem("accessToken");
-    if (userInfo) {
-      setChecker(true);
-    } else {
-      setChecker(false);
-    }
   }
-  async function getCount() {
-    try {
-      setUserInfoToken(await decryptCrypto());
-      const result = await getApi(`${getURl.BASE_URL_CART}/getCountCart`, true);
-      console.log("rrr..", result);
+  // async function getCount() {
+  //   try {
+  //     setUserInfoToken(await decryptCrypto());
+  //     const result = await getApi(`${getURl.BASE_URL_CART}/getCountCart`, true);
+  //     console.log("rrr..", result);
 
-      if (result.status === 200) {
-        console.log("tryueue");
-        setCartCount(result.data.count);
-        // dispatch(setIsLogin(!count));
-      } else {
-        toast.error(result.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
-      }
-    } catch (err) {
-      console.log("in count", err);
-    }
-  }
+  //     if (result.status === 200) {
+  //       console.log("tryueue");
+  //       setCartCount(result.data.count);
+  //     } else {
+  //       toast.error(result.message, {
+  //         position: toast.POSITION.TOP_CENTER,
+  //       });
+  //     }
+  //   } catch (err) {
+  //     console.log("in count", err);
+  //   }
+  // }
   useEffect(() => {
-    getCount();
     checkStatus();
-  }, [count]);
+  }, [count, cartCounter]);
   return (
     <div>
       <nav className="navbar navbar-expand-lg bg-body-tertiary">
@@ -109,8 +101,7 @@ function Header() {
                             <Badge
                               color="secondary"
                               showZero
-                              badgeContent={cartCount}
-                              
+                              badgeContent={cartCounter}
                             >
                               <ShoppingCartIcon />
                             </Badge>

@@ -11,7 +11,21 @@ import AddProduct from "./component/product/addProduct";
 import GetProduct from "./component/product/getProduct";
 import EditProduct from "./component/product/editProduct";
 import GetCart from "./component/usercart/getCart";
+import PrivateRoutes from "./privateRoutes/PrivateRoutes";
+import { useEffect, useState } from "react";
+import decryptCrypto from "./utils/decryptCrypto";
+import PaymentGateway from "./component/paymentGateway/paymentGateway";
 function App() {
+  const [data, setData] = useState();
+  const [islogin, setisLogin] = useState();
+  async function getUserData() {
+    const data = await decryptCrypto();
+    console.log("data", data);
+    await setData(data);
+  }
+  useEffect(() => {
+    getUserData();
+  }, []);
   return (
     <div>
       <BrowserRouter>
@@ -26,12 +40,29 @@ function App() {
             element={<UpdateUser></UpdateUser>}
           ></Route>
           <Route path="/addProduct" element={<AddProduct></AddProduct>}></Route>
+          {/* <Route
+            path="/product"
+            element={
+              <PrivateRoutes>
+                <GetProduct />
+              </PrivateRoutes>
+            }
+          ></Route> */}
           <Route path="/product" element={<GetProduct></GetProduct>}></Route>
           <Route
             path="/updateProduct/:id"
             element={<EditProduct></EditProduct>}
           ></Route>
+          {/* <Route
+            path="/showCart"
+            element={
+              <PrivateRoutes data={data}>
+                <GetCart />
+              </PrivateRoutes>
+            }
+          ></Route> */}
           <Route path="/showCart" element={<GetCart></GetCart>}></Route>
+          <Route path="/payment" element={<PaymentGateway></PaymentGateway>}></Route>
         </Routes>
         <ToastContainer />
       </BrowserRouter>
@@ -40,3 +71,4 @@ function App() {
 }
 
 export default App;
+

@@ -2,6 +2,7 @@ const getURl = {
   BASE_URL_USER: "http://localhost:3001/user",
   BASE_URL_PRODUCT: "http://localhost:3001/product",
   BASE_URL_CART: "http://localhost:3001/usercart",
+  BASE_URL_PAYMENT:"http://localhost:3001/payment",
   cryptojs: "uewyhf84yhrt082",
 
   username_required: "Username is required",

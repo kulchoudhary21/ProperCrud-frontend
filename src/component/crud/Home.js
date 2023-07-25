@@ -53,7 +53,6 @@ function Home() {
     } catch (err) {
       console.log("ee", err);
     }
-
   }
   async function deleteUser(id) {
     try {
@@ -78,7 +77,6 @@ function Home() {
     } catch (err) {
       console.log("ee", err);
     }
-
   }
   return (
     <div>
