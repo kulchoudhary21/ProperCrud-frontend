@@ -15,6 +15,10 @@ import PrivateRoutes from "./privateRoutes/PrivateRoutes";
 import { useEffect, useState } from "react";
 import decryptCrypto from "./utils/decryptCrypto";
 import PaymentGateway from "./component/paymentGateway/paymentGateway";
+import Chat from "./component/chatApp/chat";
+import Test from "./component/chatApp/test";
+import UserList from "./component/chatApp/userlist";
+import ChatApp from "./component/chatApp/chatApp";
 function App() {
   const [data, setData] = useState();
   const [islogin, setisLogin] = useState();
@@ -31,7 +35,6 @@ function App() {
       <BrowserRouter>
         <Header></Header>
         <Routes>
-          {/* <Route path="/" element={<DashBoard></DashBoard>}></Route> */}
           <Route path="/dash" element={<Home></Home>}></Route>
           <Route path="/login" element={<Login></Login>}></Route>
           <Route path="/register" element={<UserData></UserData>}></Route>
@@ -40,29 +43,20 @@ function App() {
             element={<UpdateUser></UpdateUser>}
           ></Route>
           <Route path="/addProduct" element={<AddProduct></AddProduct>}></Route>
-          {/* <Route
-            path="/product"
-            element={
-              <PrivateRoutes>
-                <GetProduct />
-              </PrivateRoutes>
-            }
-          ></Route> */}
           <Route path="/product" element={<GetProduct></GetProduct>}></Route>
           <Route
             path="/updateProduct/:id"
             element={<EditProduct></EditProduct>}
           ></Route>
-          {/* <Route
-            path="/showCart"
-            element={
-              <PrivateRoutes data={data}>
-                <GetCart />
-              </PrivateRoutes>
-            }
-          ></Route> */}
           <Route path="/showCart" element={<GetCart></GetCart>}></Route>
-          <Route path="/payment" element={<PaymentGateway></PaymentGateway>}></Route>
+          <Route
+            path="/payment"
+            element={<PaymentGateway></PaymentGateway>}
+          ></Route>
+          {/* <Route path="/chat" element={<Chat></Chat>}></Route> */}
+          <Route path="/chatapp" element={<ChatApp></ChatApp>}></Route>
+          {/* <Route path="/test" element={<Test></Test>}></Route> */}
+          <Route path="/userlist" element={<UserList></UserList>}></Route>
         </Routes>
         <ToastContainer />
       </BrowserRouter>
@@ -71,4 +65,3 @@ function App() {
 }
 
 export default App;
-

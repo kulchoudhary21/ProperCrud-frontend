@@ -6,6 +6,7 @@ import decryptCrypto from "../../utils/decryptCrypto";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Badge, Stack } from "@mui/material";
 import "react-toastify/dist/ReactToastify.css";
+import ChatIcon from "@mui/icons-material/Chat";
 function Header() {
   const navigate = useNavigate();
   const [userInfoToken, setUserInfoToken] = useState();
@@ -20,24 +21,6 @@ function Header() {
     console.log();
     const userInfo = localStorage.getItem("accessToken");
   }
-  // async function getCount() {
-  //   try {
-  //     setUserInfoToken(await decryptCrypto());
-  //     const result = await getApi(`${getURl.BASE_URL_CART}/getCountCart`, true);
-  //     console.log("rrr..", result);
-
-  //     if (result.status === 200) {
-  //       console.log("tryueue");
-  //       setCartCount(result.data.count);
-  //     } else {
-  //       toast.error(result.message, {
-  //         position: toast.POSITION.TOP_CENTER,
-  //       });
-  //     }
-  //   } catch (err) {
-  //     console.log("in count", err);
-  //   }
-  // }
   useEffect(() => {
     checkStatus();
   }, [count, cartCounter]);
@@ -111,6 +94,26 @@ function Header() {
                     </>
                   ) : null}
                 </>
+                <li>
+                  <Link
+                    className="nav-link"
+                    to="/userlist"
+                    style={{ position: "absolute", right: "20%" }}
+                  >
+                    <ChatIcon
+                      spacing={4}
+                      direction="row"
+                      sx={{ color: "action.active" }}
+                    ></ChatIcon>
+                  </Link>
+                </li>
+                {/* <li>
+                  <Link
+                    className="nav-link"
+                    to="/test"
+                    style={{ position: "absolute", right: "30%" }}
+                  >testing..</Link>
+                </li> */}
                 <>
                   <Link
                     className="nav-link"

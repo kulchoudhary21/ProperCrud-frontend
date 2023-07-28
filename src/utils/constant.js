@@ -3,6 +3,8 @@ const getURl = {
   BASE_URL_PRODUCT: "http://localhost:3001/product",
   BASE_URL_CART: "http://localhost:3001/usercart",
   BASE_URL_PAYMENT:"http://localhost:3001/payment",
+  BASE_URL_CHAT:"http://localhost:3001/chat",
+  BASE_URL_MESSAGE:"http://localhost:3001/message",
   cryptojs: "uewyhf84yhrt082",
 
   username_required: "Username is required",
