@@ -18,17 +18,26 @@ function Chat({ roomId, ReceiverId }) {
   });
   const bottomRef = useRef(null);
   useEffect(() => {
-    enterRoom();
-  }, [roomId]);
+    console.log("============room id===========",roomId)
+      enterRoom();
+    }, [roomId]);
 
   useEffect(() => {
-    socket.on("broadcast", (result,ls) => {
-      console.log("last..",ls)
-      setAllMessages(result);
-      setMessage(result.messages);
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    socket.on("broadcast", (result, ls) => {
+      console.log("result-27", result)
+      console.log("roomiid",roomId)
+      if(result.length > 0){
+        if (result && result[0].id === roomId) {
+          setAllMessages(result);
+          setMessage(result.messages);
+          bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
+      }else{
+        setAllMessages([]);
+      }
+      
     });
-  });
+  }, [socket]);
 
   async function enterRoom() {
     const name = await decryptCrypto();
@@ -40,13 +49,14 @@ function Chat({ roomId, ReceiverId }) {
       userReceiverId: ReceiverId,
     });
     socket.emit("join_room", roomId);
-    socket.on("broadcast", (result,lst) => {
-      console.log("last11..",lst)
+    socket.on("broadcast", (result, lst) => {
+      console.log("last11..", lst);
       setAllMessages(result);
     });
   }
   async function sendMessage() {
     try {
+      console.log("inputField58",inputField)
       await socket.emit("send_message", inputField, lastMessages);
       setMessage(inputField.messages);
       setRender(!render);

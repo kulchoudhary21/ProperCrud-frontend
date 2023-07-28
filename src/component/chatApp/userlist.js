@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-
+import socket from "./io";
 import { Link } from "react-router-dom";
 import { postApi } from "../../utils/apiUtils";
 import getURl from "../../utils/constant";
@@ -12,14 +12,33 @@ function UserList() {
   const [flag, setFlag] = useState();
   const [ReceiverId, setReceiverId] = useState();
   const [isChatting, setIsChatting] = useState(false);
+  const [isRender, setIsRender] = useState(false);
   const [roomId, setRoomId] = useState();
-  const chatBox = useMemo(
-    () => <Chat flag={flag} roomId={roomId} ReceiverId={ReceiverId}></Chat>,
-    [flag]
-  );
+  const [roomIdForSelf, setRoomIdForSelf] = useState();
+  const [allListUsers, setAllListUsers] = useState();
+  // const chatBox = useMemo(
+  //   () => <Chat flag={flag} roomId={roomId} ReceiverId={ReceiverId}></Chat>,
+  //   [flag]
+  // );
+
+  const chatBox = useMemo(() => {
+    return <Chat flag={flag} roomId={roomId} ReceiverId={ReceiverId}/>;
+  }, [isRender]);
+
   useEffect(() => {
-    getUserList();
+    // getUserList();
+    callRoom();
   }, []);
+  useEffect(() => {
+    console.log("hitting socket...")
+    socket.on("broadcast_self",(result)=>{
+      setAllListUsers(result)
+    })
+  }, [socket]);
+  async function callRoom() {
+    const currentUser = await decryptCrypto();
+    checkRoomNew(currentUser.id);
+  }
   async function checkRoom(userReceiverId) {
     try {
       setReceiverId(userReceiverId);
@@ -35,6 +54,7 @@ function UserList() {
         setRoomId(result.data.data[0].id);
         setIsChatting(true);
         setFlag(result.data.data[0].id);
+        setIsRender(!isRender)
       } else {
         toast.error(result.message, {
           position: toast.POSITION.TOP_RIGHT,
@@ -44,30 +64,62 @@ function UserList() {
       console.log("ee", err);
     }
   }
-  const getUserList = async () => {
+  async function enterRoom(selfRoomID) {
+    socket.emit("join_room_self", selfRoomID);
+
+    // socket.on("broadcast_user", (result,lst) => {
+    //   console.log("last11..",lst)
+    //   setAllListUsers(result);
+    // });
+  }
+  async function checkRoomNew(userReceiverId) {
     try {
+      setReceiverId(userReceiverId);
       const currentUser = await decryptCrypto();
-      const result = await postApi(
-        `${getURl.BASE_URL_CHAT}/users`,
-        { id: currentUser.id },
-        true
-      );
-      console.log(result);
-      if (result) {
-        setUserList(result.data.data);
-      } else if (result.status == 400) {
-        toast.error(result.response.data.message, {
-          position: toast.POSITION.TOP_CENTER,
-        });
+      const obj = {
+        userSenderId: currentUser.id,
+        userReceiverId: userReceiverId,
+      };
+      const result = await postApi(`${getURl.BASE_URL_CHAT}/room`, obj, true);
+      if (result.status === 200 && result.data.roomCheck) {
+        console.log("userdatarrrrrr", result.data.data);
+        console.log("roomId", result.data.data[0].id);
+        setRoomIdForSelf(result.data.data[0].id);
+        enterRoom(result.data.data[0].id);
       } else {
         toast.error(result.message, {
-          position: toast.POSITION.TOP_CENTER,
+          position: toast.POSITION.TOP_RIGHT,
         });
       }
     } catch (err) {
-      console.log("error ", err);
+      console.log("ee", err);
     }
-  };
+  }
+
+  // const getUserList = async () => {
+  //   try {
+  //     const currentUser = await decryptCrypto();
+  //     const result = await postApi(
+  //       `${getURl.BASE_URL_CHAT}/users`,
+  //       { id: currentUser.id },
+  //       true
+  //     );
+  //     console.log(result);
+  //     if (result) {
+  //       setUserList(result.data.data);
+  //     } else if (result.status == 400) {
+  //       toast.error(result.response.data.message, {
+  //         position: toast.POSITION.TOP_CENTER,
+  //       });
+  //     } else {
+  //       toast.error(result.message, {
+  //         position: toast.POSITION.TOP_CENTER,
+  //       });
+  //     }
+  //   } catch (err) {
+  //     console.log("error ", err);
+  //   }
+  // };
   return (
     <>
       <section style={{ backgroundColor: "#eee" }}>
@@ -80,9 +132,9 @@ function UserList() {
               <div class="card">
                 <div class="card-body">
                   <ul class="list-unstyled mb-0">
-                    {userList ? (
+                    {allListUsers ? (
                       <>
-                        {userList.map((item) => {
+                        {allListUsers.map((item) => {
                           return (
                             <li
                               class="p-2 border-bottom"
