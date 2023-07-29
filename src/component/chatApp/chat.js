@@ -7,30 +7,30 @@ import decryptCrypto from "../../utils/decryptCrypto";
 import moment from "moment";
 function Chat({ roomId, ReceiverId }) {
   const [messages, setMessage] = useState();
-  const [render, setRender] = useState(false);
   const [allMessage, setAllMessages] = useState();
-  const [lastMessages, setLastMessages] = useState({});
   const [inputField, setInputField] = useState({
     userReceiverId: "",
     roomId: "",
     messages: "",
     userReceiverId: "",
   });
-  const bottomRef = useRef(null);
+  // const bottomRef = useRef(null);
   useEffect(() => {
     console.log("============room id===========",roomId)
       enterRoom();
     }, [roomId]);
 
   useEffect(() => {
-    socket.on("broadcast", (result, ls) => {
+    socket.on("broadcast", (result) => {
       console.log("result-27", result)
       console.log("roomiid",roomId)
+      // console.log("============room id===========222222",result[0].roomId)
+      console.log("============room id===========111111",roomId)
       if(result.length > 0){
         if (result && result[0].id === roomId) {
           setAllMessages(result);
           setMessage(result.messages);
-          bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+          // bottomRef.current?.scrollIntoView({ behavior: "smooth" });
         }
       }else{
         setAllMessages([]);
@@ -49,17 +49,16 @@ function Chat({ roomId, ReceiverId }) {
       userReceiverId: ReceiverId,
     });
     socket.emit("join_room", roomId);
-    socket.on("broadcast", (result, lst) => {
-      console.log("last11..", lst);
+    await socket.on("broadcast", (result) => {
+      console.log("last11..", result);
       setAllMessages(result);
     });
   }
   async function sendMessage() {
     try {
       console.log("inputField58",inputField)
-      await socket.emit("send_message", inputField, lastMessages);
+      await socket.emit("send_message", inputField);
       setMessage(inputField.messages);
-      setRender(!render);
       setInputField({ ...inputField, messages: "" });
     } catch (err) {
       console.log("error in chat");
@@ -73,7 +72,6 @@ function Chat({ roomId, ReceiverId }) {
       ...inputField,
       [e.target.name]: e.target.value,
     });
-    if (e.target.name == "messages") setLastMessages(e.target.value);
   }
   return (
     <div
@@ -140,7 +138,7 @@ function Chat({ roomId, ReceiverId }) {
                 type="button"
                 style={{}}
                 class="btn btn-info btn-rounded float-end"
-                onClick={sendMessage}
+                onClick={()=>sendMessage()}
               >
                 Send
               </button>
@@ -148,7 +146,7 @@ function Chat({ roomId, ReceiverId }) {
           </div>
         </li>
       </ul>
-      <div ref={bottomRef} />
+      {/* <div ref={bottomRef} /> */}
     </div>
   );
 }

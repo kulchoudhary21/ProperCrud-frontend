@@ -16,11 +16,6 @@ function UserList() {
   const [roomId, setRoomId] = useState();
   const [roomIdForSelf, setRoomIdForSelf] = useState();
   const [allListUsers, setAllListUsers] = useState();
-  // const chatBox = useMemo(
-  //   () => <Chat flag={flag} roomId={roomId} ReceiverId={ReceiverId}></Chat>,
-  //   [flag]
-  // );
-
   const chatBox = useMemo(() => {
     return <Chat flag={flag} roomId={roomId} ReceiverId={ReceiverId}/>;
   }, [isRender]);
@@ -28,7 +23,7 @@ function UserList() {
   useEffect(() => {
     // getUserList();
     callRoom();
-  }, []);
+  }, [ReceiverId]);
   useEffect(() => {
     console.log("hitting socket...")
     socket.on("broadcast_self",(result)=>{
@@ -48,7 +43,7 @@ function UserList() {
         userReceiverId: userReceiverId,
       };
       const result = await postApi(`${getURl.BASE_URL_CHAT}/room`, obj, true);
-      if (result.status === 200 && result.data.roomCheck) {
+      if (result.status === 200) {
         console.log("userdatarrrrrr", result.data.data);
         console.log("roomId", result.data.data[0].id);
         setRoomId(result.data.data[0].id);
