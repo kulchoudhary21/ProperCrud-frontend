@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import socket from "./io";
 import { Link } from "react-router-dom";
 import { postApi } from "../../utils/apiUtils";
@@ -8,7 +8,6 @@ import "react-toastify/dist/ReactToastify.css";
 import decryptCrypto from "../../utils/decryptCrypto";
 import Chat from "./chat";
 function UserList() {
-  const [userList, setUserList] = useState();
   const [flag, setFlag] = useState();
   const [ReceiverId, setReceiverId] = useState();
   const [isChatting, setIsChatting] = useState(false);
@@ -16,19 +15,26 @@ function UserList() {
   const [roomId, setRoomId] = useState();
   const [roomIdForSelf, setRoomIdForSelf] = useState();
   const [allListUsers, setAllListUsers] = useState();
+  const socketClientRef = useRef();
+  const [userCount, setUserCount] = useState(0);
   const chatBox = useMemo(() => {
-    return <Chat flag={flag} roomId={roomId} ReceiverId={ReceiverId}/>;
+    return <Chat flag={flag} roomId={roomId} ReceiverId={ReceiverId} />;
   }, [isRender]);
 
   useEffect(() => {
-    // getUserList();
     callRoom();
   }, [ReceiverId]);
   useEffect(() => {
-    console.log("hitting socket...")
-    socket.on("broadcast_self",(result)=>{
-      setAllListUsers(result)
-    })
+    console.log("hitting socket...");
+    socket.on("broadcast_self", (result) => {
+      setAllListUsers(result);
+    });
+    //-----------------------
+    socket.on("user_count", ({ count }) => {
+      setUserCount(count);
+    });
+    //---------------------
+    // socketClientRef.current = socket
   }, [socket]);
   async function callRoom() {
     const currentUser = await decryptCrypto();
@@ -49,7 +55,7 @@ function UserList() {
         setRoomId(result.data.data[0].id);
         setIsChatting(true);
         setFlag(result.data.data[0].id);
-        setIsRender(!isRender)
+        setIsRender(!isRender);
       } else {
         toast.error(result.message, {
           position: toast.POSITION.TOP_RIGHT,
@@ -62,8 +68,8 @@ function UserList() {
   async function enterRoom(selfRoomID) {
     socket.emit("join_room_self", selfRoomID);
 
-    // socket.on("broadcast_user", (result,lst) => {
-    //   console.log("last11..",lst)
+    // socket.on("broadcast_self", (result) => {
+    //   console.log("last11..",result)
     //   setAllListUsers(result);
     // });
   }
@@ -158,7 +164,7 @@ function UserList() {
                                 <div class="pt-1">
                                   <p class="small text-muted mb-1">Just now</p>
                                   <span class="badge bg-danger float-end">
-                                    1
+                                    {userCount}
                                   </span>
                                 </div>
                               </Link>

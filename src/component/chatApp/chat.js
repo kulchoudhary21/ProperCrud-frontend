@@ -14,28 +14,27 @@ function Chat({ roomId, ReceiverId }) {
     messages: "",
     userReceiverId: "",
   });
-  // const bottomRef = useRef(null);
+  const bottomRef = useRef(null);
   useEffect(() => {
-    console.log("============room id===========",roomId)
-      enterRoom();
-    }, [roomId]);
+    console.log("============room id===========", roomId);
+    enterRoom();
+  }, [roomId]);
 
   useEffect(() => {
     socket.on("broadcast", (result) => {
-      console.log("result-27", result)
-      console.log("roomiid",roomId)
+      console.log("result-27", result);
+      console.log("roomiid", roomId);
       // console.log("============room id===========222222",result[0].roomId)
-      console.log("============room id===========111111",roomId)
-      if(result.length > 0){
+      console.log("============room id===========111111", roomId);
+      if (result.length > 0) {
         if (result && result[0].id === roomId) {
           setAllMessages(result);
           setMessage(result.messages);
-          // bottomRef.current?.scrollIntoView({ behavior: "smooth" });
         }
-      }else{
+      } else {
         setAllMessages([]);
       }
-      
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     });
   }, [socket]);
 
@@ -56,7 +55,7 @@ function Chat({ roomId, ReceiverId }) {
   }
   async function sendMessage() {
     try {
-      console.log("inputField58",inputField)
+      console.log("inputField58", inputField);
       await socket.emit("send_message", inputField);
       setMessage(inputField.messages);
       setInputField({ ...inputField, messages: "" });
@@ -138,7 +137,7 @@ function Chat({ roomId, ReceiverId }) {
                 type="button"
                 style={{}}
                 class="btn btn-info btn-rounded float-end"
-                onClick={()=>sendMessage()}
+                onClick={() => sendMessage()}
               >
                 Send
               </button>
@@ -146,31 +145,10 @@ function Chat({ roomId, ReceiverId }) {
           </div>
         </li>
       </ul>
-      {/* <div ref={bottomRef} /> */}
+      <div ref={bottomRef} />
     </div>
   );
 }
 
 export default Chat;
 
-// async function setUserMessage() {
-//   const currentUser = await decryptCrypto();
-//   // const data = {
-//   //   roomId: roomId,
-//   //   messages: message,
-//   //   userSenderId: currentUser.id,
-//   //   userReceiverId: ReceiverId,
-//   // };
-//   // const result = await postApi(
-//   //   `${getURl.BASE_URL_MESSAGE}/setMessage`,
-//   //   data,
-//   //   true
-//   // );
-//   // if (result.status === 200 && result.data.roomCheck) {
-//   //   console.log("in post ", result.data.data);
-//   // } else {
-//   //   toast.error(result.message, {
-//   //     position: toast.POSITION.TOP_RIGHT,
-//   //   });
-//   // }
-// }
