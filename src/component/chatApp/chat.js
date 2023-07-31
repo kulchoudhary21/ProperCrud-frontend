@@ -13,6 +13,7 @@ function Chat({ roomId, ReceiverId }) {
     roomId: "",
     messages: "",
     userReceiverId: "",
+    isRead:false
   });
   const bottomRef = useRef(null);
   useEffect(() => {
@@ -21,7 +22,7 @@ function Chat({ roomId, ReceiverId }) {
   }, [roomId]);
 
   useEffect(() => {
-    socket.on("broadcast", (result) => {
+    socket.on("broadcast", (result, selfId) => {
       console.log("result-27", result);
       console.log("roomiid", roomId);
       // console.log("============room id===========222222",result[0].roomId)
@@ -51,6 +52,7 @@ function Chat({ roomId, ReceiverId }) {
     await socket.on("broadcast", (result) => {
       console.log("last11..", result);
       setAllMessages(result);
+      // setInputField({ ...inputField, messages: "" });
     });
   }
   async function sendMessage() {
@@ -58,7 +60,7 @@ function Chat({ roomId, ReceiverId }) {
       console.log("inputField58", inputField);
       await socket.emit("send_message", inputField);
       setMessage(inputField.messages);
-      setInputField({ ...inputField, messages: "" });
+      // setInputField({ ...inputField, messages: "" });
     } catch (err) {
       console.log("error in chat");
     }
@@ -151,4 +153,3 @@ function Chat({ roomId, ReceiverId }) {
 }
 
 export default Chat;
-

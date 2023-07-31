@@ -23,22 +23,19 @@ function UserList() {
 
   useEffect(() => {
     callRoom();
-  }, [ReceiverId]);
+  }, []);
   useEffect(() => {
     console.log("hitting socket...");
     socket.on("broadcast_self", (result) => {
       setAllListUsers(result);
     });
-    //-----------------------
-    socket.on("user_count", ({ count }) => {
-      setUserCount(count);
-    });
-    //---------------------
-    // socketClientRef.current = socket
+
+    socket.on("sender_selfid",(senderSelfId)=>{
+      console.log("senderSelfId",senderSelfId)
+    })
   }, [socket]);
   async function callRoom() {
-    const currentUser = await decryptCrypto();
-    checkRoomNew(currentUser.id);
+    await checkRoomNew();
   }
   async function checkRoom(userReceiverId) {
     try {
@@ -67,22 +64,22 @@ function UserList() {
   }
   async function enterRoom(selfRoomID) {
     socket.emit("join_room_self", selfRoomID);
-
+    
     // socket.on("broadcast_self", (result) => {
     //   console.log("last11..",result)
     //   setAllListUsers(result);
     // });
   }
-  async function checkRoomNew(userReceiverId) {
+  async function checkRoomNew() {
     try {
-      setReceiverId(userReceiverId);
       const currentUser = await decryptCrypto();
       const obj = {
         userSenderId: currentUser.id,
-        userReceiverId: userReceiverId,
+        userReceiverId: currentUser.id,
       };
+      console.log("currentUser", obj);
       const result = await postApi(`${getURl.BASE_URL_CHAT}/room`, obj, true);
-      if (result.status === 200 && result.data.roomCheck) {
+      if (result.status === 200) {
         console.log("userdatarrrrrr", result.data.data);
         console.log("roomId", result.data.data[0].id);
         setRoomIdForSelf(result.data.data[0].id);
