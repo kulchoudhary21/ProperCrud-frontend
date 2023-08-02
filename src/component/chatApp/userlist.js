@@ -17,8 +17,17 @@ function UserList() {
   const [allListUsers, setAllListUsers] = useState();
   const socketClientRef = useRef();
   const [userCount, setUserCount] = useState(0);
+  const [currentUserId, setCurrentUserID] = useState();
+
   const chatBox = useMemo(() => {
-    return <Chat flag={flag} roomId={roomId} ReceiverId={ReceiverId} />;
+    return (
+      <Chat
+        flag={flag}
+        roomId={roomId}
+        ReceiverId={ReceiverId}
+        currentUserId={currentUserId}
+      />
+    );
   }, [isRender]);
 
   useEffect(() => {
@@ -41,6 +50,7 @@ function UserList() {
     try {
       setReceiverId(userReceiverId);
       const currentUser = await decryptCrypto();
+      setCurrentUserID(currentUser.id);
       const obj = {
         userSenderId: currentUser.id,
         userReceiverId: userReceiverId,
@@ -64,7 +74,7 @@ function UserList() {
   }
   async function enterRoom(selfRoomID) {
     const currentUser = await decryptCrypto();
-    socket.emit("join_room_self", selfRoomID,currentUser.id);
+    socket.emit("join_room_self", selfRoomID, currentUser.id);
 
     // socket.on("broadcast_self", (result) => {
     //   console.log("last11..",result)

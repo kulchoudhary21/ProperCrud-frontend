@@ -19,6 +19,7 @@ import Chat from "./component/chatApp/chat";
 import Test from "./component/chatApp/test";
 import UserList from "./component/chatApp/userlist";
 import ChatApp from "./component/chatApp/chatApp";
+import Testing from "./dummy/testing";
 function App() {
   const [data, setData] = useState();
   const [islogin, setisLogin] = useState();
@@ -57,6 +58,8 @@ function App() {
           <Route path="/chatapp" element={<ChatApp></ChatApp>}></Route>
           {/* <Route path="/test" element={<Test></Test>}></Route> */}
           <Route path="/userlist" element={<UserList></UserList>}></Route>
+
+          <Route path="/done" element={<Testing></Testing>}></Route>
         </Routes>
         <ToastContainer />
       </BrowserRouter>
