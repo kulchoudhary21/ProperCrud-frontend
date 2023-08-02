@@ -29,10 +29,10 @@ function UserList() {
     socket.on("broadcast_self", (result) => {
       setAllListUsers(result);
     });
-
-    socket.on("sender_selfid",(senderSelfId)=>{
-      console.log("senderSelfId",senderSelfId)
-    })
+    socket.on("sender_selfid", (dataAllUsers) => {
+      console.log("senderSelfId.....", dataAllUsers);
+      setAllListUsers(dataAllUsers);
+    });
   }, [socket]);
   async function callRoom() {
     await checkRoomNew();
@@ -63,8 +63,9 @@ function UserList() {
     }
   }
   async function enterRoom(selfRoomID) {
-    socket.emit("join_room_self", selfRoomID);
-    
+    const currentUser = await decryptCrypto();
+    socket.emit("join_room_self", selfRoomID,currentUser.id);
+
     // socket.on("broadcast_self", (result) => {
     //   console.log("last11..",result)
     //   setAllListUsers(result);
@@ -93,7 +94,20 @@ function UserList() {
       console.log("ee", err);
     }
   }
-
+  // async function getLastMessage(){
+  //   try{
+  //     const currentUser=await decryptCrypto()
+  //     const data={
+  //       ReceiverId:currentUser.id
+  //     }
+  //     console.log("data.....",data)
+  //     const result=await postApi(`${getURl.BASE_URL_MESSAGE}/lastMessage`,data,true)
+  //     console.log("result...11;11111",result)
+  //   }
+  //   catch(err){
+  //     console.log("eroor....",err)
+  //   }
+  // }
   // const getUserList = async () => {
   //   try {
   //     const currentUser = await decryptCrypto();
@@ -154,16 +168,16 @@ function UserList() {
                                   <div class="pt-1">
                                     <p class="fw-bold mb-0">{item.name}</p>
                                     <p class="small text-muted">
-                                      Hello, Are you there?
+                                      {item.lastMessage ? item.lastMessage : ""}
                                     </p>
                                   </div>
                                 </div>
-                                <div class="pt-1">
+                                {/* <div class="pt-1">
                                   <p class="small text-muted mb-1">Just now</p>
                                   <span class="badge bg-danger float-end">
                                     {userCount}
                                   </span>
-                                </div>
+                                </div> */}
                               </Link>
                             </li>
                           );

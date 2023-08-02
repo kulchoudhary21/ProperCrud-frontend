@@ -60,7 +60,7 @@ function Chat({ roomId, ReceiverId }) {
       console.log("inputField58", inputField);
       await socket.emit("send_message", inputField);
       setMessage(inputField.messages);
-      // setInputField({ ...inputField, messages: "" });
+      setInputField({ ...inputField, messages: "" });
     } catch (err) {
       console.log("error in chat");
     }
@@ -153,3 +153,4 @@ function Chat({ roomId, ReceiverId }) {
 }
 
 export default Chat;
+
