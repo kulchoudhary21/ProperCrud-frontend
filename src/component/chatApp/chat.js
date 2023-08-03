@@ -23,11 +23,9 @@ function Chat({ roomId, ReceiverId, currentUserId }) {
     console.log("============room id===========", roomId);
     scrollToBottom();
     enterRoom();
-
   }, [roomId]);
 
   useEffect(() => {
-    
     socket.on("broadcast", (result, selfId) => {
       if (result.length > 0) {
         if (result && result[0].id === roomId) {
@@ -41,11 +39,18 @@ function Chat({ roomId, ReceiverId, currentUserId }) {
     scrollToBottom();
   }, [socket]);
 
-
   async function enterRoom() {
-    console.log("entring in rooom")
+    console.log("entring in rooom");
     // setInputField({ ...inputField, messages: "" });
     const name = await decryptCrypto();
+    console.log(
+      "---------pppppppppp",
+      inputField,
+      roomId,
+      messages,
+      name.id,
+      ReceiverId
+    );
     setInputField({
       ...inputField,
       roomId: roomId,
@@ -66,17 +71,17 @@ function Chat({ roomId, ReceiverId, currentUserId }) {
       console.log("inputField58", inputField);
       await socket.emit("send_message", inputField);
       setMessage(inputField.messages);
-      setInputField({ ...inputField, messages: "" });
+      // setInputField({ ...inputField, messages: "" });
       setInputField({ ...inputField, messages: "" });
       scrollToBottom();
     } catch (err) {
       console.log("error in chat");
     }
   }
-
   function inputHandler(e) {
     console.log("e.target.value", e.target.value);
     console.log("inputField", inputField);
+
     setInputField({
       ...inputField,
       [e.target.name]: e.target.value,

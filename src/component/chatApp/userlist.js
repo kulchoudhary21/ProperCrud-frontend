@@ -18,7 +18,14 @@ function UserList() {
   const socketClientRef = useRef();
   const [userCount, setUserCount] = useState(0);
   const [currentUserId, setCurrentUserID] = useState();
-
+  let [inputField, setInputField] = useState({
+      userReceiverId: "",
+      roomId: "",
+      messages: "",
+      userReceiverId: "",
+      isRead: false,
+    });
+    //  const [messages, setMessage] = useState();
   const chatBox = useMemo(() => {
     return (
       <Chat
@@ -75,11 +82,6 @@ function UserList() {
   async function enterRoom(selfRoomID) {
     const currentUser = await decryptCrypto();
     socket.emit("join_room_self", selfRoomID, currentUser.id);
-
-    // socket.on("broadcast_self", (result) => {
-    //   console.log("last11..",result)
-    //   setAllListUsers(result);
-    // });
   }
   async function checkRoomNew() {
     try {
@@ -104,44 +106,6 @@ function UserList() {
       console.log("ee", err);
     }
   }
-  // async function getLastMessage(){
-  //   try{
-  //     const currentUser=await decryptCrypto()
-  //     const data={
-  //       ReceiverId:currentUser.id
-  //     }
-  //     console.log("data.....",data)
-  //     const result=await postApi(`${getURl.BASE_URL_MESSAGE}/lastMessage`,data,true)
-  //     console.log("result...11;11111",result)
-  //   }
-  //   catch(err){
-  //     console.log("eroor....",err)
-  //   }
-  // }
-  // const getUserList = async () => {
-  //   try {
-  //     const currentUser = await decryptCrypto();
-  //     const result = await postApi(
-  //       `${getURl.BASE_URL_CHAT}/users`,
-  //       { id: currentUser.id },
-  //       true
-  //     );
-  //     console.log(result);
-  //     if (result) {
-  //       setUserList(result.data.data);
-  //     } else if (result.status == 400) {
-  //       toast.error(result.response.data.message, {
-  //         position: toast.POSITION.TOP_CENTER,
-  //       });
-  //     } else {
-  //       toast.error(result.message, {
-  //         position: toast.POSITION.TOP_CENTER,
-  //       });
-  //     }
-  //   } catch (err) {
-  //     console.log("error ", err);
-  //   }
-  // };
   return (
     <>
       <section style={{ backgroundColor: "#eee" }}>
